@@ -1,9 +1,10 @@
 <resources>
     <string name="app_name">AnamorphicDesqueeze</string>
     <string name="info_about_app">This app allows you to change the aspect ratio of any image. Ideal for desqueezing pictures taken with an anamorphic lens.</string>
-    <string name="info_how_to_use">To use this app:
-        \n\n1. Start from your typical image gallery and use the share option selecting this app to open the image with.
+    <string name="info_how_to_use">
+        1. Start from your typical image gallery and use the share option selecting this app to open the image with.
         \n\n2. Landing in this app again, select the desired image ratio and execute the resize.
         \n\n3. Finally you\'ll find the result in your preferred gallery app again.</string>
     <string name="contentDescription_sample_image">sample image</string>
+    <string name="title_how_to_use">How to use this App</string>
 </resources>

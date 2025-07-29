@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleSendImage(intent: Intent) {
+        // TODO fix deprecated code here
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
             setContent(ImageContent(imageUrl = it))
             // TODO Update UI to reflect image being shared + options

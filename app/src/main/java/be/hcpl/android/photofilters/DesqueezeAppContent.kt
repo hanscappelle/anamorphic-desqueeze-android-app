@@ -14,8 +14,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -30,7 +34,9 @@ fun DesqueezeAppContent(
         verticalArrangement = spacedBy(16.dp),
         modifier = modifier.padding(16.dp),
     ) {
+        Title(stringResource(R.string.app_name))
         AppInfo()
+        Title(stringResource(R.string.title_how_to_use))
         DesqueezeInfo()
         DesqueezeImage(content = content)
     }
@@ -49,6 +55,22 @@ fun AppInfo(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun Title(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        modifier = modifier,
+        //style = TextStyle.Default.text
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        maxLines = 1,
+    )
+}
+
+
+@Composable
 fun DesqueezeInfo(modifier: Modifier = Modifier) {
     Text(
         text = stringResource(R.string.info_how_to_use),
@@ -61,8 +83,8 @@ fun DesqueezeImage(
     modifier: Modifier = Modifier,
     content: ImageContent,
 ) {
-    //if( content.imageUrl != null ) {
-        // TODO or use glide instead
+    if (content.imageUrl != null) {
+        // TODO or use glide instead, placeholder isn't working here so done manually
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(content.imageUrl)
@@ -71,18 +93,18 @@ fun DesqueezeImage(
             contentDescription = stringResource(R.string.contentDescription_sample_image),
             modifier = modifier
                 .padding(4.dp)
-                .size(200.dp),
-                //.clip(CircleShape),
+                .size(width = 300.dp, height = Dp.Unspecified),
+            //.clip(CircleShape),
             contentScale = ContentScale.Crop,
         )
-    //} else {
+    } else {
         // display some placeholder here
-    //    Image(
-    //        painter = painterResource(id = R.drawable.ic_launcher_background),
-    //        contentDescription = stringResource(R.string.contentDescription_sample_image),
-    //        modifier = modifier.size(200.dp),
-    //    )
-    //}
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_background),
+            contentDescription = stringResource(R.string.contentDescription_sample_image),
+            modifier = modifier.size(200.dp),
+        )
+    }
 }
 
 @Preview(showBackground = true)
