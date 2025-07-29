@@ -13,4 +13,8 @@ To use this app:
 
 # Resources
 
-About sharing image intent on Android: https://developer.android.com/training/sharing/send
+About sharing image intent on Android: https://developer.android.com/training/sharing/receive
+
+Display image in compose, including from uri:
+https://developer.android.com/develop/ui/compose/graphics/images/loading
+https://stackoverflow.com/questions/77226214/jetpack-compose-load-uri-image-on-screen
