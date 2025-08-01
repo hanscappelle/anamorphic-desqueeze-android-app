@@ -2,6 +2,10 @@
 
 Simple open source Android app to change the aspect ratio of any image using default intents.
 
+This app allows you to pick any image from your preferred Android Image Gallery and share it directly into this app resulting in a newly generated, desqueezed image in your Gallery.
+
+For this the width of the original image is multiplied by 1.33 to get the full image width. Current release is limited to images (not video) and has a fixed 1.33 ratio and 85% JPEG output. Future releases may introduce more settings to control this.
+
 Project https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
 ## How to Use
@@ -36,7 +40,11 @@ Currently very basic implementation
 
 # Version History
 
-# 0.1.0
+## 0.2.0
+
+Update app icon and app store listing
+
+## 0.1.0
 
 First version, minimal app release
 
@@ -50,3 +58,6 @@ https://stackoverflow.com/questions/77226214/jetpack-compose-load-uri-image-on-s
 
 About permissions to write to storage:
 https://developer.android.com/training/data-storage/shared/media
+
+App logo created with:
+https://hotpot.ai/logo-generator/create
