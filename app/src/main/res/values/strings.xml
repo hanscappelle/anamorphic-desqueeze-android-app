@@ -9,4 +9,6 @@
     <string name="title_how_to_use">How to use this App</string>
     <string name="action_desqueeze">Desqueeze</string>
     <string name="action_open_gallery">Open Gallery</string>
+    <string name="contentDescription_screenshot_01">Open gallery and select share</string>
+    <string name="contentDescription_screenshot_02">From image share option select this app</string>
 </resources>
