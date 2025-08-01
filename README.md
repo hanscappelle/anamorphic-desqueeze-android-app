@@ -10,6 +10,8 @@ Google Play Store: https://play.google.com/store/apps/details?id=be.hcpl.android
 
 Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
+<img src="https://github.com/hanscappelle/anamorphic-desqueeze-android-app/blob/main/screenshots/2znfVZxAjJ9I_1024_500.png"/>
+
 ## How to Use
 
 To use this app:
