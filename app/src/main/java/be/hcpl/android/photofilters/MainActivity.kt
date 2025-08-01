@@ -19,6 +19,13 @@ import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 import java.io.OutputStream
 
+private const val IMAGE_JPEG = "image/jpeg"
+private const val PREFIX = "Desqueezed"
+private const val EXT_JPEG = "JPEG"
+private const val INTENT_TYPE_ALL_IMAGE = "image/"
+private const val ASPECT_RATIO = 1.33
+private const val JPEG_COMPRESSION = 85
+
 class MainActivity : ComponentActivity() {
 
     // TODO add ViewModel here to handle logic
@@ -53,8 +60,8 @@ class MainActivity : ComponentActivity() {
             try {
                 originalBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(imageUri))
                 scaledBitmap =
-                    originalBitmap.scale((originalBitmap.width * 1.33).toInt(), originalBitmap.height)// keep height, change width by distortion value
-                val fileName = "Desqueezed_${System.currentTimeMillis()}.JPG"
+                    originalBitmap.scale((originalBitmap.width * ASPECT_RATIO).toInt(), originalBitmap.height)// keep height, change width by distortion value
+                val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
                 insertImage(scaledBitmap, fileName)?.let {
                     displayCreatedImage(it)
                 }
@@ -68,7 +75,7 @@ class MainActivity : ComponentActivity() {
     private fun handleReceivedContent() {
         when {
             intent?.action == Intent.ACTION_SEND -> {
-                if (intent.type?.startsWith("image/") == true) {
+                if (intent.type?.startsWith(INTENT_TYPE_ALL_IMAGE) == true) {
                     handleReceivedImage(intent) // Handle single image being sent
                 }
             }
@@ -99,7 +106,7 @@ class MainActivity : ComponentActivity() {
         values.put(MediaStore.Images.Media.TITLE, name)
         values.put(MediaStore.Images.Media.DISPLAY_NAME, name)
         //values.put(MediaStore.Images.Media.DESCRIPTION, description)
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        values.put(MediaStore.Images.Media.MIME_TYPE, IMAGE_JPEG)
         // Add the date meta data to ensure the image is added at the front of the gallery
         values.put(MediaStore.Images.Media.DATE_ADDED, timestamp)
         values.put(MediaStore.Images.Media.DATE_TAKEN, timestamp)
@@ -110,7 +117,7 @@ class MainActivity : ComponentActivity() {
             uri?.let { uri ->
                 out = cr.openOutputStream(uri)
                 out?.let { out ->
-                    source.compress(Bitmap.CompressFormat.JPEG, 85, out)
+                    source.compress(Bitmap.CompressFormat.JPEG, JPEG_COMPRESSION, out)
                 }
             }
         } catch (_: Exception) {
@@ -125,7 +132,7 @@ class MainActivity : ComponentActivity() {
     private fun displayCreatedImage(uri: Uri) {
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW
-        intent.setDataAndType(uri, "image/jpeg")
+        intent.setDataAndType(uri, IMAGE_JPEG)
         startActivity(intent)
     }
 }
