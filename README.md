@@ -26,6 +26,12 @@ Currently very basic implementation
 - Configuration for export format
 - Also support Video !? (unlikely, would need background processing and what not)
 
+## Release Info
+
+- use original release key (package re-used)
+- create an apk (not app bundle yet)
+- create tag on each release
+
 # Version History
 
 # 0.1.0
