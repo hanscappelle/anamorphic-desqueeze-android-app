@@ -28,6 +28,7 @@ import coil.request.ImageRequest
 fun DesqueezeAppContent(
     modifier: Modifier = Modifier,
     content: ImageContent = ImageContent(),
+    onGallery: () -> Unit = {},
     onResize: () -> Unit = {},
 ) {
     Column(
@@ -38,8 +39,8 @@ fun DesqueezeAppContent(
         Title(stringResource(R.string.app_name))
         AppInfo()
         Title(stringResource(R.string.title_how_to_use))
-        DesqueezeInfo() // TODO show steps as progress made instead
-        DesqueezeAction(onResize)
+        DesqueezeInfo()
+        DesqueezeAction(content, onGallery, onResize)
         DesqueezeImage(content = content)
     }
 }
@@ -82,14 +83,21 @@ fun DesqueezeInfo(modifier: Modifier = Modifier) {
 
 @Composable
 fun DesqueezeAction(
+    content: ImageContent,
+    onOpenGallery: () -> Unit,
     onResize: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val imageSet = content.imageUrl != null
     Button(
         modifier = modifier,
-        onClick = { onResize() },
+        onClick = { if( imageSet ) onResize() else onOpenGallery() },
     ) {
-        Text(stringResource(R.string.action_desqueeze))
+        if( imageSet )
+            Text(stringResource(R.string.action_desqueeze))
+        else {
+            Text(stringResource(R.string.action_open_gallery))
+        }
     }
 }
 
@@ -109,7 +117,6 @@ fun DesqueezeImage(
             modifier = modifier
                 .padding(4.dp)
                 .size(width = 300.dp, height = Dp.Unspecified),
-            //.clip(CircleShape),
             contentScale = ContentScale.Crop,
         )
     } else {

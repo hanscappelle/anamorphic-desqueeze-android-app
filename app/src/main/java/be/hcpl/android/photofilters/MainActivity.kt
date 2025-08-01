@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity() {
                     DesqueezeAppContent(
                         modifier = Modifier.padding(innerPadding),
                         content = imageContent,
-                        onResize = ::handleResizeImage
+                        onGallery = { handleOpenGallery(null) },
+                        onResize = ::handleResizeImage,
                     )
                 }
             }
@@ -60,10 +61,13 @@ class MainActivity : ComponentActivity() {
             try {
                 originalBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(imageUri))
                 scaledBitmap =
-                    originalBitmap.scale((originalBitmap.width * ASPECT_RATIO).toInt(), originalBitmap.height)// keep height, change width by distortion value
+                    originalBitmap.scale(
+                        (originalBitmap.width * ASPECT_RATIO).toInt(),
+                        originalBitmap.height
+                    )// keep height, change width by distortion value
                 val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
                 insertImage(scaledBitmap, fileName)?.let {
-                    displayCreatedImage(it)
+                    handleOpenGallery(it)
                 }
             } finally {
                 originalBitmap?.recycle()
@@ -129,10 +133,13 @@ class MainActivity : ComponentActivity() {
         return uri // reference to inserted image
     }
 
-    private fun displayCreatedImage(uri: Uri) {
+    private fun handleOpenGallery(uri: Uri?) {
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW
-        intent.setDataAndType(uri, IMAGE_JPEG)
+        uri?.let {
+            intent.setDataAndType(it, IMAGE_JPEG)
+        } ?: intent.setType(IMAGE_JPEG)
         startActivity(intent)
     }
+
 }
