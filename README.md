@@ -6,7 +6,9 @@ This app allows you to pick any image from your preferred Android Image Gallery 
 
 For this the width of the original image is multiplied by 1.33 to get the full image width. Current release is limited to images (not video) and has a fixed 1.33 ratio and 85% JPEG output. Future releases may introduce more settings to control this.
 
-Project https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
+Google Play Store: https://play.google.com/store/apps/details?id=be.hcpl.android.photofilters
+
+Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
 ## How to Use
 
