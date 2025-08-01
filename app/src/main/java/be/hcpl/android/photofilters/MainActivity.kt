@@ -72,6 +72,9 @@ class MainActivity : ComponentActivity() {
             } finally {
                 originalBitmap?.recycle()
                 scaledBitmap?.recycle()
+                // remove image content set before
+                imageContent = ImageContent()
+                updateContent()
             }
         }
     }
