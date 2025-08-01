@@ -1,53 +1,83 @@
 package be.hcpl.android.photofilters
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.Parcelable
+import android.provider.MediaStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
+import java.net.URL
 
 class MainActivity : ComponentActivity() {
+
+    // TODO add ViewModel here to handle logic
+    private var imageContent: ImageContent = ImageContent()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent(ImageContent())
-        // TODO add ViewModel here to handle logic
+        updateContent()
         // check for received images
         handleReceivedContent()
 
     }
 
-    private fun setContent(imageContent: ImageContent) {
+    private fun updateContent() {
         setContent {
             AnamorphicDesqueezeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     DesqueezeAppContent(
                         modifier = Modifier.padding(innerPadding),
                         content = imageContent,
+                        onResize = ::handleResizeImage
                     )
                 }
             }
         }
     }
 
+    private fun handleResizeImage() {
+        imageContent.imageUrl?.let { imageUri ->
+            var out: OutputStream? = null
+            var originalBitmap: Bitmap? = null
+            var scaledBitmap: Bitmap? = null
+            try {
+                originalBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(imageUri))
+                // TODO make ratio configurable
+                scaledBitmap = originalBitmap.scale((originalBitmap.width * 1.33).toInt(), originalBitmap.height)// keep height, change width by distortion value
+                val path = Environment.getExternalStorageDirectory().toString()
+                val file = File(path, "Desqueezed_${System.currentTimeMillis()}.JPG")
+                out = FileOutputStream(file);
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+                out.flush()
+                MediaStore.Images.Media.insertImage(contentResolver, file.absolutePath, file.name, file.name);
+            } finally {
+                out?.close()
+                originalBitmap?.recycle()
+                scaledBitmap?.recycle()
+            }
+        }
+    }
 
     private fun handleReceivedContent() {
         when {
             intent?.action == Intent.ACTION_SEND -> {
                 if (intent.type?.startsWith("image/") == true) {
-                    handleSendImage(intent) // Handle single image being sent
+                    handleReceivedImage(intent) // Handle single image being sent
                 }
             }
             // TODO support multiple images in future release
@@ -61,11 +91,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleSendImage(intent: Intent) {
+    private fun handleReceivedImage(intent: Intent) {
         // TODO fix deprecated code here
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
-            setContent(ImageContent(imageUrl = it))
-            // TODO Update UI to reflect image being shared + options
+            imageContent = ImageContent(imageUrl = it)
+            updateContent()
+            // TODO fix image display ratio and such
         }
     }
 }

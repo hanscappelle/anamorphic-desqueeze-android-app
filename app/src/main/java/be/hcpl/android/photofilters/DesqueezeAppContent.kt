@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,7 +15,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -28,6 +28,7 @@ import coil.request.ImageRequest
 fun DesqueezeAppContent(
     modifier: Modifier = Modifier,
     content: ImageContent = ImageContent(),
+    onResize: () -> Unit = {},
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -37,7 +38,8 @@ fun DesqueezeAppContent(
         Title(stringResource(R.string.app_name))
         AppInfo()
         Title(stringResource(R.string.title_how_to_use))
-        DesqueezeInfo()
+        DesqueezeInfo() // TODO show steps as progress made instead
+        DesqueezeAction(onResize)
         DesqueezeImage(content = content)
     }
 }
@@ -76,6 +78,19 @@ fun DesqueezeInfo(modifier: Modifier = Modifier) {
         text = stringResource(R.string.info_how_to_use),
         modifier = modifier
     )
+}
+
+@Composable
+fun DesqueezeAction(
+    onResize: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        modifier = modifier,
+        onClick = { onResize() },
+    ) {
+        Text(stringResource(R.string.action_desqueeze))
+    }
 }
 
 @Composable

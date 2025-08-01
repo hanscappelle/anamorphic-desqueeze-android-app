@@ -7,4 +7,5 @@
         \n\n3. Finally you\'ll find the result in your preferred gallery app again.</string>
     <string name="contentDescription_sample_image">sample image</string>
     <string name="title_how_to_use">How to use this App</string>
+    <string name="action_desqueeze">Desqueeze</string>
 </resources>
