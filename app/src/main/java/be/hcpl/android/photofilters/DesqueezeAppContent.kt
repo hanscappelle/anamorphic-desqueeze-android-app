@@ -11,8 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+//import androidx.compose.ui.layout.ContentScale
+//import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+//import coil.compose.AsyncImage
+//import coil.request.ImageRequest
 
 @Composable
 fun DesqueezeAppContent(
@@ -41,7 +41,7 @@ fun DesqueezeAppContent(
         Title(stringResource(R.string.title_how_to_use))
         DesqueezeInfo()
         DesqueezeAction(content, onGallery, onResize)
-        DesqueezeImage(content = content)
+        DesqueezeImage()
     }
 }
 
@@ -91,9 +91,9 @@ fun DesqueezeAction(
     val imageSet = content.imageUrl != null
     Button(
         modifier = modifier,
-        onClick = { if( imageSet ) onResize() else onOpenGallery() },
+        onClick = { if (imageSet) onResize() else onOpenGallery() },
     ) {
-        if( imageSet )
+        if (imageSet)
             Text(stringResource(R.string.action_desqueeze))
         else {
             Text(stringResource(R.string.action_open_gallery))
@@ -104,8 +104,26 @@ fun DesqueezeAction(
 @Composable
 fun DesqueezeImage(
     modifier: Modifier = Modifier,
-    content: ImageContent,
 ) {
+    Column(
+        verticalArrangement = spacedBy(16.dp),
+        modifier = modifier,
+        ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.screenshot_01),
+            contentDescription = stringResource(R.string.contentDescription_screenshot_01),
+            modifier = Modifier.size(width = 300.dp, height = Dp.Unspecified),
+        )
+
+        Image(
+            painter = painterResource(id = R.drawable.screenshot_02),
+            contentDescription = stringResource(R.string.contentDescription_screenshot_02),
+            modifier = Modifier.size(width = 300.dp, height = Dp.Unspecified),
+        )
+    }
+    /*
+    // no real added value in showing a preview of the selected image here, instead show some instructions
     if (content.imageUrl != null) {
         // TODO or use glide instead, placeholder isn't working here so done manually
         AsyncImage(
@@ -127,6 +145,7 @@ fun DesqueezeImage(
             modifier = modifier.size(200.dp),
         )
     }
+     */
 }
 
 @Preview(showBackground = true)
