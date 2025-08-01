@@ -11,8 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-//import androidx.compose.ui.layout.ContentScale
-//import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,8 +19,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
-//import coil.compose.AsyncImage
-//import coil.request.ImageRequest
 
 @Composable
 fun DesqueezeAppContent(
@@ -65,7 +61,6 @@ fun Title(
     Text(
         text = text,
         modifier = modifier,
-        //style = TextStyle.Default.text
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         maxLines = 1,
