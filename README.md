@@ -10,6 +10,27 @@ To use this app:
 - Landing in this app again, select the desired image ratio and execute the resize.
 - Finally you\'ll find the result in your preferred gallery app again.
 
+# Features
+
+Currently very basic implementation
+
+- Open an image from your preferred Image Gallery using default Android Intent
+- Desqueeze to fixed aspect ratio of width*1,33 x height
+- Fixed JPEG full original size 85% compression
+- Opens result in Gallery again
+
+## Upcoming features
+
+- Allow for different aspect ratio's like 1,55 and/or fully custom ones
+- General UI improvements
+- Configuration for export format
+- Also support Video !? (unlikely, would need background processing and what not)
+
+# Version History
+
+# 0.1.0
+
+First version, minimal app release
 
 # Resources
 
