@@ -10,7 +10,7 @@ Google Play Store: https://play.google.com/store/apps/details?id=be.hcpl.android
 
 Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
-<img src="https://github.com/hanscappelle/anamorphic-desqueeze-android-app/blob/main/screenshots/2znfVZxAjJ9I_1024_500.png"/>
+<img alt="app feature image" src="https://github.com/hanscappelle/anamorphic-desqueeze-android-app/blob/main/screenshots/2znfVZxAjJ9I_1024_500.png"/>
 
 ## How to Use
 
@@ -18,7 +18,7 @@ To use this app:
 
 - Start from your typical image gallery and use the share option selecting this app to open the image with.
 - Landing in this app again, select the desired image ratio and execute the resize.
-- Finally you\'ll find the result in your preferred gallery app again.
+- Finally you\'ll find the result in your preferred gallery app.
 
 # Features
 
@@ -27,7 +27,7 @@ Currently very basic implementation
 - Open an image from your preferred Image Gallery using default Android Intent
 - Desqueeze to fixed aspect ratio of width*1,33 x height
 - Fixed JPEG full original size 85% compression
-- Opens result in Gallery again
+- Opens result in Gallery
 
 ## Upcoming features
 
