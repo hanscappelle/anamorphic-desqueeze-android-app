@@ -18,3 +18,6 @@ About sharing image intent on Android: https://developer.android.com/training/sh
 Display image in compose, including from uri:
 https://developer.android.com/develop/ui/compose/graphics/images/loading
 https://stackoverflow.com/questions/77226214/jetpack-compose-load-uri-image-on-screen
+
+About permissions to write to storage:
+https://developer.android.com/training/data-storage/shared/media
