@@ -1,6 +1,8 @@
 # Anamorphic Desqueeze App
 
-Simple app to change the aspect ratio of any image. 
+Simple open source Android app to change the aspect ratio of any image using default intents.
+
+Project https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
 ## How to Use
 
