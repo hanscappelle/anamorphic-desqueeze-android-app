@@ -1,15 +1,11 @@
 package be.hcpl.android.photofilters
 
-import android.content.ContentResolver
-import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.os.Parcelable
 import android.provider.MediaStore
 import androidx.activity.ComponentActivity
@@ -21,8 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
-import java.io.File
-import java.io.FileOutputStream
 import java.io.OutputStream
 
 class MainActivity : ComponentActivity() {
@@ -34,9 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         updateContent()
-        // checks for received images
-        handleReceivedContent()
-
+        handleReceivedContent() // checks for received images
     }
 
     private fun updateContent() {
@@ -54,45 +46,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleResizeImage() {
+        // TODO make ratio configurable, support at least also 1,55x
         imageContent.imageUrl?.let { imageUri ->
-            var out: OutputStream? = null
             var originalBitmap: Bitmap? = null
             var scaledBitmap: Bitmap? = null
             try {
                 originalBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(imageUri))
-                // TODO make ratio configurable
                 scaledBitmap =
                     originalBitmap.scale((originalBitmap.width * 1.33).toInt(), originalBitmap.height)// keep height, change width by distortion value
                 val fileName = "Desqueezed_${System.currentTimeMillis()}.JPG"
-
-                insertImage(scaledBitmap, fileName)
-
-                //val path = Environment.getExternalStorageDirectory().toString()
-                //val file = File(path, fileName)
-                //out = FileOutputStream(file);
-                //scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
-                //out.flush()
-
-                //MediaStore.Images.Media.insertImage(contentResolver, file.absolutePath, file.name, file.name);
-/*
-                // Add a specific media item.
-                val resolver = applicationContext.contentResolver
-                val imageCollection =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        MediaStore.Images.Media.getContentUri(
-                            MediaStore.VOLUME_EXTERNAL_PRIMARY
-                        )
-                    } else {
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    }
-                val newImage = ContentValues().apply {
-                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                insertImage(scaledBitmap, fileName)?.let {
+                    displayCreatedImage(it)
                 }
-                val newFileUri = resolver.insert(imageCollection, newImage)
-*/
-
             } finally {
-                out?.close()
                 originalBitmap?.recycle()
                 scaledBitmap?.recycle()
             }
@@ -111,9 +77,7 @@ class MainActivity : ComponentActivity() {
             //        && intent.type?.startsWith("image/") == true -> {
             //    handleSendMultipleImages(intent) // Handle multiple images being sent
             //}
-            else -> {
-                // Handle other intents, such as being started from the home screen
-            }
+            else -> Unit // Handle other intents, such as being started from the home screen
         }
     }
 
@@ -122,11 +86,10 @@ class MainActivity : ComponentActivity() {
         (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
             imageContent = ImageContent(imageUrl = it)
             updateContent()
-            // TODO fix image display ratio and such
         }
     }
 
-    private fun insertImage(source: Bitmap, name: String) {
+    private fun insertImage(source: Bitmap, name: String): Uri? {
 
         var out: OutputStream? = null
         val cr = applicationContext.contentResolver
@@ -150,24 +113,19 @@ class MainActivity : ComponentActivity() {
                     source.compress(Bitmap.CompressFormat.JPEG, 85, out)
                 }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // do some clean up, something clearly failed
             uri?.let { cr.delete(it, null, null) }
         } finally {
             out?.close()
         }
+        return uri // reference to inserted image
     }
 
-    // TODO should we display right after
-    private fun displayCreatedImage(uri: String) {
+    private fun displayCreatedImage(uri: Uri) {
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW
-        //if (savedOnSD) {
-        //    File file = new File(url)
-        //    if (file.exists())
-        //        intent.setDataAndType(Uri.fromFile(file), "image/jpeg")
-        //} else
-        intent.setDataAndType(Uri.parse(uri), "image/jpeg")
+        intent.setDataAndType(uri, "image/jpeg")
         startActivity(intent)
     }
 }
