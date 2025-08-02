@@ -1,18 +1,25 @@
 package be.hcpl.android.photofilters
 
 import android.net.Uri
+import android.widget.Spinner
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text2.input.rememberTextFieldState
 import androidx.compose.material3.Button
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -23,9 +30,10 @@ import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 @Composable
 fun DesqueezeAppContent(
     modifier: Modifier = Modifier,
-    content: ImageContent = ImageContent(),
+    content: ImageConfig = ImageConfig(),
     onGallery: () -> Unit = {},
     onResize: () -> Unit = {},
+    selectRatio: (Float) -> Unit = {},
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -36,13 +44,19 @@ fun DesqueezeAppContent(
         AppInfo()
         Title(stringResource(R.string.title_how_to_use))
         DesqueezeInfo()
-        DesqueezeAction(content, onGallery, onResize)
+        // action depends on image selected or not
+        if (content.imageUrl == null) {
+            OpenGalleryAction(onGallery)
+        } else {
+            DesqueezeAction(content, onResize, selectRatio)
+        }
         DesqueezeImage()
     }
 }
 
-data class ImageContent(
+data class ImageConfig(
     val imageUrl: Uri? = null,
+    val aspectRatio: Float = ASPECT_RATIO_DEFAULT,
 )
 
 @Composable
@@ -77,21 +91,60 @@ fun DesqueezeInfo(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun DesqueezeAction(
-    content: ImageContent,
+fun OpenGalleryAction(
     onOpenGallery: () -> Unit,
-    onResize: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val imageSet = content.imageUrl != null
     Button(
         modifier = modifier,
-        onClick = { if (imageSet) onResize() else onOpenGallery() },
+        onClick = { onOpenGallery() },
     ) {
-        if (imageSet)
+        Text(stringResource(R.string.action_open_gallery))
+    }
+}
+
+@Composable
+fun DesqueezeAction(
+    content: ImageConfig,
+    onResize: () -> Unit,
+    selectRatio: (Float) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = spacedBy(16.dp),
+        modifier = modifier,
+    ) {
+        Text(text = stringResource(R.string.hint_ratio))
+        Column {
+            RatioSelect(ASPECT_RATIO_1_33, content.aspectRatio == ASPECT_RATIO_1_33, selectRatio)
+            RatioSelect(ASPECT_RATIO_1_55, content.aspectRatio == ASPECT_RATIO_1_55, selectRatio)
+            //RatioSelect(0f, false, selectRatio)
+        }
+        Button(
+            onClick = { onResize() },
+        ) {
             Text(stringResource(R.string.action_desqueeze))
-        else {
-            Text(stringResource(R.string.action_open_gallery))
+        }
+    }
+}
+
+@Composable
+fun RatioSelect(ratio: Float, selected: Boolean, selectRatio: (Float) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        RadioButton(
+            selected = selected,
+            onClick = { selectRatio(ratio) },
+        )
+        if (ratio == 0f) {
+            // TODO implement custom input here + remember state
+        } else {
+            Text(
+                text = "$ratio",
+                modifier = Modifier.clickable {
+                    selectRatio(ratio)
+                },
+            )
         }
     }
 }
@@ -103,7 +156,7 @@ fun DesqueezeImage(
     Column(
         verticalArrangement = spacedBy(16.dp),
         modifier = modifier,
-        ) {
+    ) {
 
         Image(
             painter = painterResource(id = R.drawable.screenshot_01),
@@ -117,36 +170,12 @@ fun DesqueezeImage(
             modifier = Modifier.size(width = 300.dp, height = Dp.Unspecified),
         )
     }
-    /*
-    // no real added value in showing a preview of the selected image here, instead show some instructions
-    if (content.imageUrl != null) {
-        // TODO or use glide instead, placeholder isn't working here so done manually
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(content.imageUrl)
-                .placeholder(R.drawable.ic_launcher_background)
-                .build(),
-            contentDescription = stringResource(R.string.contentDescription_sample_image),
-            modifier = modifier
-                .padding(4.dp)
-                .size(width = 300.dp, height = Dp.Unspecified),
-            contentScale = ContentScale.Crop,
-        )
-    } else {
-        // display some placeholder here
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_background),
-            contentDescription = stringResource(R.string.contentDescription_sample_image),
-            modifier = modifier.size(200.dp),
-        )
-    }
-     */
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     AnamorphicDesqueezeTheme {
-        DesqueezeAppContent()
+        DesqueezeAppContent(content = ImageConfig(imageUrl = Uri.EMPTY))
     }
 }

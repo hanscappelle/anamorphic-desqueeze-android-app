@@ -20,7 +20,7 @@ To use this app:
 - Landing in this app again, select the desired image ratio and execute the resize.
 - Finally you\'ll find the result in your preferred gallery app.
 
-# Features
+## Features
 
 Currently very basic implementation
 
@@ -31,30 +31,34 @@ Currently very basic implementation
 
 ## Upcoming features
 
-- Allow for different aspect ratio's like 1,55 and/or fully custom ones
+- Allow for fully custom aspect ratio + remember last used one
 - General UI improvements
-- Configuration for export format
-- Also support Video !? (unlikely, would need background processing and what not)
+- Configuration for export format (and compression ratio in case of JPEG)
 
 ## Release Info
 
 - use original release key (package re-used)
-- create an apk (not app bundle yet)
+- create an apk (not app bundle)
 - create tag on each release
 
-# Version History
+## Version History
 
-## 0.2.0
+### 0.3.0
+
+Selectable aspect ratio, 1.33x or 1.55x
+
+### 0.2.0
 
 Update app icon and app store listing
 
-## 0.1.0
+### 0.1.0
 
 First version, minimal app release
 
-# Resources
+## Resources
 
-About sharing image intent on Android: https://developer.android.com/training/sharing/receive
+About sharing image intent on Android: 
+https://developer.android.com/training/sharing/receive
 
 Display image in compose, including from uri:
 https://developer.android.com/develop/ui/compose/graphics/images/loading

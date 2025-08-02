@@ -11,4 +11,5 @@
     <string name="action_open_gallery">Open Gallery</string>
     <string name="contentDescription_screenshot_01">Open gallery and select share</string>
     <string name="contentDescription_screenshot_02">From image share option select this app</string>
+    <string name="hint_ratio">Use Ratio</string>
 </resources>

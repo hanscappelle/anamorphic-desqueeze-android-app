@@ -5,6 +5,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
+import android.os.Build.VERSION
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
@@ -19,17 +21,10 @@ import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 import java.io.OutputStream
 
-private const val IMAGE_JPEG = "image/jpeg"
-private const val PREFIX = "Desqueezed"
-private const val EXT_JPEG = "JPEG"
-private const val INTENT_TYPE_ALL_IMAGE = "image/"
-private const val ASPECT_RATIO = 1.33
-private const val JPEG_COMPRESSION = 85
-
 class MainActivity : ComponentActivity() {
 
     // TODO add ViewModel here to handle logic
-    private var imageContent: ImageContent = ImageContent()
+    private var imageConfig: ImageConfig = ImageConfig()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,8 +39,9 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     DesqueezeAppContent(
                         modifier = Modifier.padding(innerPadding),
-                        content = imageContent,
+                        content = imageConfig,
                         onGallery = { handleOpenGallery(null) },
+                        selectRatio = ::updateRatio,
                         onResize = ::handleResizeImage,
                     )
                 }
@@ -53,16 +49,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun updateRatio(newRatio: Float){
+        imageConfig = imageConfig.copy(aspectRatio = newRatio)
+        updateContent()
+    }
+
     private fun handleResizeImage() {
-        // TODO make ratio configurable, support at least also 1,55x
-        imageContent.imageUrl?.let { imageUri ->
+        imageConfig.imageUrl?.let { imageUri ->
             var originalBitmap: Bitmap? = null
             var scaledBitmap: Bitmap? = null
             try {
                 originalBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(imageUri))
                 scaledBitmap =
                     originalBitmap.scale(
-                        (originalBitmap.width * ASPECT_RATIO).toInt(),
+                        (originalBitmap.width * imageConfig.aspectRatio).toInt(),
                         originalBitmap.height
                     )// keep height, change width by distortion value
                 val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
                 originalBitmap?.recycle()
                 scaledBitmap?.recycle()
                 // remove image content set before
-                imageContent = ImageContent()
+                imageConfig = ImageConfig()
                 updateContent()
             }
         }
@@ -96,9 +96,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleReceivedImage(intent: Intent) {
-        // TODO fix deprecated code here
-        (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let {
-            imageContent = ImageContent(imageUrl = it)
+        val uri = if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Parcelable::class.java) as? Uri
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
+        }
+        uri?.let {
+            imageConfig = ImageConfig(imageUrl = it)
             updateContent()
         }
     }
