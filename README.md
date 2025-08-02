@@ -38,7 +38,7 @@ Currently very basic implementation
 ## Release Info
 
 - use original release key (package re-used)
-- create an apk (not app bundle)
+- create an app bundle (converted using play signing)
 - create tag on each release
 
 ## Version History
@@ -47,7 +47,7 @@ Currently very basic implementation
 
 - selectable aspect ratio, 1.33x or 1.55x
 - allow for fully custom aspect ratio
-- technical improvements
+- technical improvements (app signing update)
 
 ### 0.2.0
 
