@@ -31,7 +31,7 @@ Currently very basic implementation
 
 ## Upcoming features
 
-- Allow for fully custom aspect ratio + remember last used one
+- remember last used aspect ratio
 - General UI improvements
 - Configuration for export format (and compression ratio in case of JPEG)
 
@@ -45,7 +45,8 @@ Currently very basic implementation
 
 ### 0.3.0
 
-Selectable aspect ratio, 1.33x or 1.55x
+- Selectable aspect ratio, 1.33x or 1.55x
+- Allow for fully custom aspect ratio
 
 ### 0.2.0
 

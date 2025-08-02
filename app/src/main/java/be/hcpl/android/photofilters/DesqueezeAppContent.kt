@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text2.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.RadioButton
@@ -33,7 +34,7 @@ fun DesqueezeAppContent(
     content: ImageConfig = ImageConfig(),
     onGallery: () -> Unit = {},
     onResize: () -> Unit = {},
-    selectRatio: (Float) -> Unit = {},
+    selectRatio: (String) -> Unit = {},
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -107,7 +108,7 @@ fun OpenGalleryAction(
 fun DesqueezeAction(
     content: ImageConfig,
     onResize: () -> Unit,
-    selectRatio: (Float) -> Unit,
+    selectRatio: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -117,9 +118,9 @@ fun DesqueezeAction(
     ) {
         Text(text = stringResource(R.string.hint_ratio))
         Column {
-            RatioSelect(ASPECT_RATIO_1_33, content.aspectRatio == ASPECT_RATIO_1_33, selectRatio)
-            RatioSelect(ASPECT_RATIO_1_55, content.aspectRatio == ASPECT_RATIO_1_55, selectRatio)
-            //RatioSelect(0f, false, selectRatio)
+            RatioSelect(ASPECT_RATIO_1_33, content.aspectRatio, content.aspectRatio == ASPECT_RATIO_1_33, selectRatio)
+            RatioSelect(ASPECT_RATIO_1_55, content.aspectRatio, content.aspectRatio == ASPECT_RATIO_1_55, selectRatio)
+            RatioSelect(0f, content.aspectRatio, content.aspectRatio != ASPECT_RATIO_1_33 && content.aspectRatio != ASPECT_RATIO_1_55, selectRatio)
         }
         Button(
             onClick = { onResize() },
@@ -130,19 +131,24 @@ fun DesqueezeAction(
 }
 
 @Composable
-fun RatioSelect(ratio: Float, selected: Boolean, selectRatio: (Float) -> Unit) {
+fun RatioSelect(initialValue: Float, ratio: Float, selected: Boolean, selectRatio: (String) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         RadioButton(
             selected = selected,
-            onClick = { selectRatio(ratio) },
+            onClick = { selectRatio("$initialValue") },
         )
-        if (ratio == 0f) {
-            // TODO implement custom input here + remember state
+        if (initialValue == 0f) {
+            TextField(
+                value = "$ratio",
+                onValueChange = { newValue -> selectRatio(newValue) },
+                modifier = Modifier.width(100.dp),
+            )
+
         } else {
             Text(
-                text = "$ratio",
+                text = "$initialValue",
                 modifier = Modifier.clickable {
-                    selectRatio(ratio)
+                    selectRatio("$initialValue")
                 },
             )
         }

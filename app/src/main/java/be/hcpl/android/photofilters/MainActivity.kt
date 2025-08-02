@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 import java.io.OutputStream
+import java.lang.Float.parseFloat
+import kotlin.Float
 
 class MainActivity : ComponentActivity() {
 
@@ -49,7 +51,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun updateRatio(newRatio: Float){
+    private fun updateRatio(newRatioValue: String){
+        val newRatio = try {
+            parseFloat(newRatioValue)
+        } catch (_: NumberFormatException){
+            0f
+        }
         imageConfig = imageConfig.copy(aspectRatio = newRatio)
         updateContent()
     }
