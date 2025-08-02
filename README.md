@@ -25,7 +25,7 @@ To use this app:
 Currently very basic implementation
 
 - Open an image from your preferred Image Gallery using default Android Intent
-- Desqueeze to fixed aspect ratio of width*1,33 x height
+- Desqueeze to preferred aspect ratio of width*ratio x height
 - Fixed JPEG full original size 85% compression
 - Opens result in Gallery
 
@@ -45,8 +45,9 @@ Currently very basic implementation
 
 ### 0.3.0
 
-- Selectable aspect ratio, 1.33x or 1.55x
-- Allow for fully custom aspect ratio
+- selectable aspect ratio, 1.33x or 1.55x
+- allow for fully custom aspect ratio
+- technical improvements
 
 ### 0.2.0
 
