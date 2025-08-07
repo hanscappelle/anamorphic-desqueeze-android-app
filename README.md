@@ -71,3 +71,6 @@ https://developer.android.com/training/data-storage/shared/media
 
 App logo created with:
 https://hotpot.ai/logo-generator/create
+
+App Feature Image created with:
+https://hotpot.ai/templates/google-play-feature-graphic
