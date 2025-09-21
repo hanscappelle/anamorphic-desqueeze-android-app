@@ -43,6 +43,10 @@ Currently very basic implementation
 
 ## Version History
 
+### 0.4.0
+
+- show error on problematic image received
+
 ### 0.3.0
 
 - selectable aspect ratio, 1.33x or 1.55x

@@ -10,6 +10,7 @@ import android.os.Build.VERSION
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,7 +22,6 @@ import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 import java.io.OutputStream
 import java.lang.Float.parseFloat
-import kotlin.Float
 
 class MainActivity : ComponentActivity() {
 
@@ -67,14 +67,17 @@ class MainActivity : ComponentActivity() {
             var scaledBitmap: Bitmap? = null
             try {
                 originalBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(imageUri))
-                scaledBitmap =
-                    originalBitmap.scale(
-                        (originalBitmap.width * imageConfig.aspectRatio).toInt(),
-                        originalBitmap.height
-                    )// keep height, change width by distortion value
-                val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
-                insertImage(scaledBitmap, fileName)?.let {
-                    handleOpenGallery(it)
+                val calculatedWidth = (originalBitmap.width * imageConfig.aspectRatio).toInt()
+                val calculatedHeight = originalBitmap.height
+                // keep height, change width by distortion value
+                if( calculatedWidth > 0 && calculatedHeight > 0 ) {
+                    scaledBitmap = originalBitmap.scale(calculatedWidth, calculatedHeight)
+                    val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
+                    insertImage(scaledBitmap, fileName)?.let {
+                        handleOpenGallery(it)
+                    }
+                } else {
+                    Toast.makeText(this, "Problem with received image", Toast.LENGTH_LONG).show()
                 }
             } finally {
                 originalBitmap?.recycle()
