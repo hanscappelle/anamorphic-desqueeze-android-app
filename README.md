@@ -46,6 +46,9 @@ Currently very basic implementation
 ### 0.4.0
 
 - show error on problematic image received
+- layout improvements
+- remember last ratio selection
+- remember last custom ratio input
 
 ### 0.3.0
 

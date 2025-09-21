@@ -117,7 +117,7 @@ fun DesqueezeAction(
         Column {
             RatioSelect(ASPECT_RATIO_1_33, content.aspectRatio, content.aspectRatio == ASPECT_RATIO_1_33, selectRatio)
             RatioSelect(ASPECT_RATIO_1_55, content.aspectRatio, content.aspectRatio == ASPECT_RATIO_1_55, selectRatio)
-            RatioSelect(0f, content.aspectRatio, content.aspectRatio != ASPECT_RATIO_1_33 && content.aspectRatio != ASPECT_RATIO_1_55, selectRatio)
+            RatioSelect(ASPECT_RATIO_CUSTOM, content.aspectRatio, content.aspectRatio != ASPECT_RATIO_1_33 && content.aspectRatio != ASPECT_RATIO_1_55, selectRatio)
         }
         Button(
             onClick = { onResize() },

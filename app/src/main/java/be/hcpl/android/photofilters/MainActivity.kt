@@ -23,7 +23,8 @@ import kotlin.getValue
 
 class MainActivity : ComponentActivity() {
 
-    // TODO add ViewModel here to handle logic
+    // TODO use this added ViewModel everywhere
+
     private val viewModel: MainViewModel by viewModel()
 
     private var imageConfig: ImageConfig = ImageConfig()
@@ -33,6 +34,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         updateContent()
         handleReceivedContent() // checks for received images
+        viewModel.state.observeForever(::handleNewState)
+    }
+
+    private fun handleNewState(state: MainViewModel.State) {
+        imageConfig = imageConfig.copy(
+            aspectRatio = state.lastUsedRatio,
+        )
+        updateContent()
     }
 
     private fun updateContent() {
@@ -58,6 +67,7 @@ class MainActivity : ComponentActivity() {
         }
         imageConfig = imageConfig.copy(aspectRatio = newRatio)
         updateContent()
+        viewModel.updateLastUsedRatio(newRatio)
     }
 
     private fun handleResizeImage() {
