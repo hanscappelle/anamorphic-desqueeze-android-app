@@ -23,8 +23,6 @@ import kotlin.getValue
 
 class MainActivity : ComponentActivity() {
 
-    // TODO use this added ViewModel everywhere
-
     private val viewModel: MainViewModel by viewModel()
 
     private var imageConfig: ImageConfig = ImageConfig()
@@ -60,6 +58,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun updateRatio(newRatioValue: String) {
+        // TODO move this logic to viewModel
         val newRatio = try {
             parseFloat(newRatioValue)
         } catch (_: NumberFormatException) {
@@ -71,6 +70,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleResizeImage() {
+        // TODO move to viewModel
         imageConfig.imageUrl?.let { imageUri ->
             var originalBitmap: Bitmap? = null
             var scaledBitmap: Bitmap? = null
@@ -115,6 +115,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleReceivedImage(intent: Intent) {
+        // TODO move to viewModel
         val uri = if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(Intent.EXTRA_STREAM, Parcelable::class.java) as? Uri
         } else {
