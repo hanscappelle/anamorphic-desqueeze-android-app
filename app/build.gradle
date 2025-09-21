@@ -52,4 +52,7 @@ dependencies {
 
     // for image loading
     //implementation(libs.coil.kt.compose)
+
+    // injection
+    implementation(libs.koin.android)
 }

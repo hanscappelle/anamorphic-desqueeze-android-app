@@ -20,12 +20,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.OutputStream
 import java.lang.Float.parseFloat
+import kotlin.getValue
 
 class MainActivity : ComponentActivity() {
 
     // TODO add ViewModel here to handle logic
+    private val viewModel: MainViewModel by viewModel()
+
     private var imageConfig: ImageConfig = ImageConfig()
 
     override fun onCreate(savedInstanceState: Bundle?) {
