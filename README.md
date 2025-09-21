@@ -57,11 +57,11 @@ Currently very basic implementation
 
 ### 0.2.0
 
-Update app icon and app store listing
+- Update app icon and app store listing
 
 ### 0.1.0
 
-First version, minimal app release
+- First version, minimal app release
 
 ## Resources
 
