@@ -1,7 +1,6 @@
 package be.hcpl.android.photofilters
 
 import android.net.Uri
-import android.widget.Spinner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text2.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -20,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -41,7 +38,7 @@ fun DesqueezeAppContent(
         verticalArrangement = spacedBy(16.dp),
         modifier = modifier.padding(16.dp),
     ) {
-        Title(stringResource(R.string.app_name))
+        //Title(stringResource(R.string.app_name))
         AppInfo()
         Title(stringResource(R.string.title_how_to_use))
         DesqueezeInfo()

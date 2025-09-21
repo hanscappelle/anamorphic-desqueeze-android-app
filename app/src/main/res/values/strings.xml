@@ -12,4 +12,5 @@
     <string name="contentDescription_screenshot_01">Open gallery and select share</string>
     <string name="contentDescription_screenshot_02">From image share option select this app</string>
     <string name="hint_ratio">Ratio</string>
+    <string name="a11y_navigate_back">Navigate back to previous screen</string>
 </resources>

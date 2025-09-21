@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.scale
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -41,24 +42,27 @@ class MainActivity : ComponentActivity() {
 
     private fun updateContent() {
         setContent {
-            AnamorphicDesqueezeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    DesqueezeAppContent(
-                        modifier = Modifier.padding(innerPadding),
-                        content = imageConfig,
-                        onGallery = { handleOpenGallery(null) },
-                        selectRatio = ::updateRatio,
-                        onResize = ::handleResizeImage,
-                    )
-                }
+            //AnamorphicDesqueezeTheme {
+            //  Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            AppScaffold(
+                title = stringResource(R.string.app_name)
+            ) {
+                DesqueezeAppContent(
+                    //modifier = Modifier.padding(innerPadding),
+                    content = imageConfig,
+                    onGallery = { handleOpenGallery(null) },
+                    selectRatio = ::updateRatio,
+                    onResize = ::handleResizeImage,
+                )
             }
+            //}
         }
     }
 
-    private fun updateRatio(newRatioValue: String){
+    private fun updateRatio(newRatioValue: String) {
         val newRatio = try {
             parseFloat(newRatioValue)
-        } catch (_: NumberFormatException){
+        } catch (_: NumberFormatException) {
             0f
         }
         imageConfig = imageConfig.copy(aspectRatio = newRatio)
@@ -74,7 +78,7 @@ class MainActivity : ComponentActivity() {
                 val calculatedWidth = (originalBitmap.width * imageConfig.aspectRatio).toInt()
                 val calculatedHeight = originalBitmap.height
                 // keep height, change width by distortion value
-                if( calculatedWidth > 0 && calculatedHeight > 0 ) {
+                if (calculatedWidth > 0 && calculatedHeight > 0) {
                     scaledBitmap = originalBitmap.scale(calculatedWidth, calculatedHeight)
                     val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
                     insertImage(scaledBitmap, fileName)?.let {
