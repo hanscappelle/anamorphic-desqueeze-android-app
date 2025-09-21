@@ -14,13 +14,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.scale
-import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.OutputStream
 import java.lang.Float.parseFloat
@@ -42,20 +37,16 @@ class MainActivity : ComponentActivity() {
 
     private fun updateContent() {
         setContent {
-            //AnamorphicDesqueezeTheme {
-            //  Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             AppScaffold(
                 title = stringResource(R.string.app_name)
             ) {
                 DesqueezeAppContent(
-                    //modifier = Modifier.padding(innerPadding),
                     content = imageConfig,
                     onGallery = { handleOpenGallery(null) },
                     selectRatio = ::updateRatio,
                     onResize = ::handleResizeImage,
                 )
             }
-            //}
         }
     }
 

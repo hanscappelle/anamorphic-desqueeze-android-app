@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 
@@ -40,7 +41,13 @@ fun AppScaffold(
                         navigationIconContentColor = Color.Black,
                         actionIconContentColor = Color.Black,
                     ),
-                    title = { Text(text = title) },
+                    title = {
+                        Text(
+                            text = title,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    },
                     modifier = Modifier.paint(
                         painter = painterResource(R.drawable.background),
                         contentScale = ContentScale.FillBounds,

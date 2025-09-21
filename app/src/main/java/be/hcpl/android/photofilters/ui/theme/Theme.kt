@@ -55,7 +55,7 @@ fun AnamorphicDesqueezeTheme(
     val view = LocalView.current
     val window = (view.context as Activity).window
     // here change the status bar element color
-    WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+    WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
 
     MaterialTheme(
         colorScheme = colorScheme,
