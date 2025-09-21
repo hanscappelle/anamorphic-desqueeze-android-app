@@ -31,7 +31,6 @@ Currently very basic implementation
 
 ## Upcoming features
 
-- remember last used aspect ratio
 - General UI improvements
 - Configuration for export format (and compression ratio in case of JPEG)
 
