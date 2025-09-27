@@ -42,6 +42,12 @@ Currently very basic implementation
 
 ## Version History
 
+### 1.0 
+
+- simplify app versioning
+- add scrolling to layout for smaller screens
+- update header in landscape
+
 ### 0.4.0
 
 - show error on problematic image received
