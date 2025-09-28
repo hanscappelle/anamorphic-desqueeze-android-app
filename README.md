@@ -29,12 +29,6 @@ Currently very basic implementation
 - Fixed JPEG full original size 85% compression
 - Opens result in Gallery
 
-## Release Info
-
-- use original release key (package re-used)
-- create an app bundle (converted using play signing)
-- create tag on each release
-
 ## Version History
 
 ### Bugs & Upcoming features
@@ -68,6 +62,12 @@ Currently very basic implementation
 ### 0.1.0
 
 - First version, minimal app release
+
+## Release Info
+
+- use original release key (package re-used)
+- create an app bundle (converted using play signing)
+- create tag on each release
 
 ## Resources
 
