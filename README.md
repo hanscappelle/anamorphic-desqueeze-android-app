@@ -29,11 +29,6 @@ Currently very basic implementation
 - Fixed JPEG full original size 85% compression
 - Opens result in Gallery
 
-## Upcoming features
-
-- General UI improvements
-- Configuration for export format (and compression ratio in case of JPEG)
-
 ## Release Info
 
 - use original release key (package re-used)
@@ -41,6 +36,11 @@ Currently very basic implementation
 - create tag on each release
 
 ## Version History
+
+### Bugs & Upcoming features
+
+- General UI improvements
+- Configuration for export format (and compression ratio in case of JPEG)
 
 ### 1.0 
 
