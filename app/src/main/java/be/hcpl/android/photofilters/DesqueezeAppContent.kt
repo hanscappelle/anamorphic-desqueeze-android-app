@@ -6,9 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -33,22 +35,35 @@ fun DesqueezeAppContent(
     onResize: () -> Unit = {},
     selectRatio: (String) -> Unit = {},
 ) {
-    Column(
+    LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = spacedBy(16.dp),
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxWidth()
     ) {
-        //Title(stringResource(R.string.app_name))
-        AppInfo()
-        Title(stringResource(R.string.title_how_to_use))
-        DesqueezeInfo()
-        // action depends on image selected or not
-        if (content.imageUrl == null) {
-            OpenGalleryAction(onGallery)
-        } else {
-            DesqueezeAction(content, onResize, selectRatio)
+        item {
+
+            //Title(stringResource(R.string.app_name))
+            AppInfo()
         }
-        DesqueezeImage()
+        item {
+            Title(stringResource(R.string.title_how_to_use))
+        }
+        item {
+            DesqueezeInfo()
+        }
+        item {
+            // action depends on image selected or not
+            if (content.imageUrl == null) {
+                OpenGalleryAction(onGallery)
+            } else {
+                DesqueezeAction(content, onResize, selectRatio)
+            }
+        }
+        item {
+            DesqueezeImage(Modifier.fillMaxWidth())
+        }
     }
 }
 
@@ -117,7 +132,12 @@ fun DesqueezeAction(
         Column {
             RatioSelect(ASPECT_RATIO_1_33, content.aspectRatio, content.aspectRatio == ASPECT_RATIO_1_33, selectRatio)
             RatioSelect(ASPECT_RATIO_1_55, content.aspectRatio, content.aspectRatio == ASPECT_RATIO_1_55, selectRatio)
-            RatioSelect(ASPECT_RATIO_CUSTOM, content.aspectRatio, content.aspectRatio != ASPECT_RATIO_1_33 && content.aspectRatio != ASPECT_RATIO_1_55, selectRatio)
+            RatioSelect(
+                ASPECT_RATIO_CUSTOM,
+                content.aspectRatio,
+                content.aspectRatio != ASPECT_RATIO_1_33 && content.aspectRatio != ASPECT_RATIO_1_55,
+                selectRatio
+            )
         }
         Button(
             onClick = { onResize() },
@@ -157,6 +177,7 @@ fun DesqueezeImage(
     modifier: Modifier = Modifier,
 ) {
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = spacedBy(16.dp),
         modifier = modifier,
     ) {
