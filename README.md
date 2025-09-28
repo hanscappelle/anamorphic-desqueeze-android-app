@@ -33,12 +33,12 @@ Currently very basic implementation
 
 ### Bugs & Upcoming features
 
-- General UI improvements
 - Configuration for export format (and compression ratio in case of JPEG)
 
 ### 1.0 
 
 - simplify app versioning
+- General UI improvements
 - add scrolling to layout for smaller screens
 - update header in landscape
 
