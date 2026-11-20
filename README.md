@@ -4,6 +4,8 @@ Simple open source Android app to change the aspect ratio of images and videos.
 
 Google Play Store: https://play.google.com/store/apps/details?id=be.hcpl.android.photofilters
 
+Download: [Debug APK v2.0](releases/app-debug-2.0.apk) (debug-signed, separate from the Play Store app).
+
 Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
 <img alt="app feature image" src="https://github.com/hanscappelle/anamorphic-desqueeze-android-app/blob/main/screenshots/2znfVZxAjJ9I_1024_500.png"/>
