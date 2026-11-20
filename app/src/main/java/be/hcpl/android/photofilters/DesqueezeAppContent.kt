@@ -56,10 +56,20 @@ fun DesqueezeAppContent(
             DesqueezeInfo()
         }
         item {
-            // action depends on image selected or not
-            if (content.imageUrl == null && content.videoUrl == null) {
+            if (content.exportProgress == null) {
                 OpenGalleryAction(onGallery)
-            } else {
+            }
+        }
+        if (content.imageUrl != null || content.videoUrl != null) {
+            item {
+                Text(
+                    stringResource(
+                        if (content.videoUrl != null) R.string.video_selected
+                        else R.string.image_selected
+                    )
+                )
+            }
+            item {
                 DesqueezeAction(content, onResize, onCancelExport, selectRatio)
             }
         }

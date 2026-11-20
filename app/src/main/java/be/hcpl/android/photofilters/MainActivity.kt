@@ -16,6 +16,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -54,6 +55,23 @@ class MainActivity : ComponentActivity() {
     private var pendingExport: (() -> Unit)? = null
     private val stateObserver = Observer<MainViewModel.State>(::handleNewState)
 
+    private val mediaPicker =
+        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            if (uri != null) {
+                val type = try {
+                    contentResolver.getType(uri)
+                } catch (_: SecurityException) {
+                    Toast.makeText(this, R.string.error_media_access, Toast.LENGTH_LONG).show()
+                    return@registerForActivityResult
+                }
+                when {
+                    type?.startsWith(INTENT_TYPE_ALL_IMAGE) == true -> selectMedia(uri, isVideo = false)
+                    type?.startsWith(INTENT_TYPE_ALL_VIDEO) == true -> selectMedia(uri, isVideo = true)
+                    else -> Toast.makeText(this, R.string.error_unsupported_media, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
     private val writePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             val export = pendingExport
@@ -73,7 +91,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setAppContent()
-        handleReceivedContent()
+        if (savedInstanceState != null) {
+            restoreSelectedMedia(savedInstanceState)
+        } else {
+            handleReceivedContent()
+        }
         viewModel.state.observeForever(stateObserver)
     }
 
@@ -90,12 +112,20 @@ class MainActivity : ComponentActivity() {
             ) {
                 DesqueezeAppContent(
                     content = mediaConfig,
-                    onGallery = { handleOpenGallery(null) },
+                    onGallery = ::openMediaPicker,
                     selectRatio = ::updateRatio,
                     onResize = ::handleResizeMedia,
                     onCancelExport = ::cancelVideoExport,
                 )
             }
+        }
+    }
+
+    private fun openMediaPicker() {
+        try {
+            mediaPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.error_media_picker_unavailable, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -319,12 +349,26 @@ class MainActivity : ComponentActivity() {
             intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
         }
         uri?.let {
-            mediaConfig = if (isVideo) {
-                MediaConfig(videoUrl = it)
-            } else {
-                MediaConfig(imageUrl = it)
-            }
+            selectMedia(it, isVideo)
         }
+    }
+
+    private fun selectMedia(uri: Uri, isVideo: Boolean) {
+        mediaConfig = mediaConfig.copy(
+            imageUrl = if (isVideo) null else uri,
+            videoUrl = if (isVideo) uri else null,
+        )
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("selected_image_uri", mediaConfig.imageUrl?.toString())
+        outState.putString("selected_video_uri", mediaConfig.videoUrl?.toString())
+    }
+
+    private fun restoreSelectedMedia(savedState: Bundle) {
+        savedState.getString("selected_image_uri")?.let { selectMedia(Uri.parse(it), isVideo = false) }
+        savedState.getString("selected_video_uri")?.let { selectMedia(Uri.parse(it), isVideo = true) }
     }
 
     private fun insertImage(source: Bitmap, name: String): Uri? {
