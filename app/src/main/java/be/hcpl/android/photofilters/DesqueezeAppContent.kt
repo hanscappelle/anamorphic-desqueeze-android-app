@@ -213,11 +213,19 @@ private fun RatioCard(
             )
             if (content.mode == ConversionMode.LETTERBOX) {
                 Column(modifier = Modifier.selectableGroup()) {
-                    RatioOption(stringResource(R.string.ratio_2_39), !customLetterboxSelected && content.letterboxRatio == 2.39f, !exporting) {
+                    RatioOption(
+                        stringResource(R.string.ratio_2_39),
+                        !customLetterboxSelected && content.letterboxRatio == 2.39f,
+                        !exporting,
+                    ) {
                         customLetterboxSelected = false
                         selectLetterboxRatio("2.39")
                     }
-                    RatioOption(stringResource(R.string.ratio_2_35), !customLetterboxSelected && content.letterboxRatio == 2.35f, !exporting) {
+                    RatioOption(
+                        stringResource(R.string.ratio_2_35),
+                        !customLetterboxSelected && content.letterboxRatio == 2.35f,
+                        !exporting,
+                    ) {
                         customLetterboxSelected = false
                         selectLetterboxRatio("2.35")
                     }
@@ -241,49 +249,49 @@ private fun RatioCard(
                     )
                 }
             } else {
-            Column(modifier = Modifier.selectableGroup()) {
-                RatioOption(
-                    label = stringResource(R.string.ratio_1_33),
-                    selected = !isCustom && content.aspectRatio == ASPECT_RATIO_1_33,
-                    enabled = !exporting,
-                    onSelect = {
-                        isCustom = false
-                        selectRatio(ASPECT_RATIO_1_33.toString())
-                    },
-                )
-                RatioOption(
-                    label = stringResource(R.string.ratio_1_55),
-                    selected = !isCustom && content.aspectRatio == ASPECT_RATIO_1_55,
-                    enabled = !exporting,
-                    onSelect = {
-                        isCustom = false
-                        selectRatio(ASPECT_RATIO_1_55.toString())
-                    },
-                )
-                RatioOption(
-                    label = stringResource(R.string.ratio_custom),
-                    selected = isCustom,
-                    enabled = !exporting,
-                    onSelect = {
-                        isCustom = true
-                        selectRatio(customRatio)
-                    },
-                )
-            }
-            if (isCustom) {
-                OutlinedTextField(
-                    value = customRatio,
-                    onValueChange = {
-                        customRatio = it
-                        selectRatio(it)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !exporting,
-                    label = { Text(stringResource(R.string.custom_ratio_label)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                )
-            }
+                Column(modifier = Modifier.selectableGroup()) {
+                    RatioOption(
+                        label = stringResource(R.string.ratio_1_33),
+                        selected = !isCustom && content.aspectRatio == ASPECT_RATIO_1_33,
+                        enabled = !exporting,
+                        onSelect = {
+                            isCustom = false
+                            selectRatio(ASPECT_RATIO_1_33.toString())
+                        },
+                    )
+                    RatioOption(
+                        label = stringResource(R.string.ratio_1_55),
+                        selected = !isCustom && content.aspectRatio == ASPECT_RATIO_1_55,
+                        enabled = !exporting,
+                        onSelect = {
+                            isCustom = false
+                            selectRatio(ASPECT_RATIO_1_55.toString())
+                        },
+                    )
+                    RatioOption(
+                        label = stringResource(R.string.ratio_custom),
+                        selected = isCustom,
+                        enabled = !exporting,
+                        onSelect = {
+                            isCustom = true
+                            selectRatio(customRatio)
+                        },
+                    )
+                }
+                if (isCustom) {
+                    OutlinedTextField(
+                        value = customRatio,
+                        onValueChange = {
+                            customRatio = it
+                            selectRatio(it)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !exporting,
+                        label = { Text(stringResource(R.string.custom_ratio_label)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                    )
+                }
             }
             if (content.exportProgress != null) {
                 Text(

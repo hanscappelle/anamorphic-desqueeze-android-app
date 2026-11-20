@@ -42,7 +42,6 @@ import androidx.media3.transformer.Transformer
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 import java.io.IOException
-import java.io.OutputStream
 import java.lang.Float.parseFloat
 import kotlin.getValue
 
@@ -191,7 +190,7 @@ class MainActivity : ComponentActivity() {
                 ?: throw IOException("Could not create an output image.")
             drawLetterboxBars(Canvas(output), mediaConfig.letterboxRatio)
             val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
-            val savedUri = insertImage(output, fileName) ?: throw IOException("Could not save the image.")
+            val savedUri = insertImage(output, fileName)
             mediaConfig = mediaConfig.copy(imageUrl = null, videoUrl = null)
             handleOpenGallery(savedUri)
         } catch (_: InvalidLetterboxRatioException) {
@@ -232,12 +231,14 @@ class MainActivity : ComponentActivity() {
                 if (calculatedWidth > 0 && calculatedHeight > 0) {
                     scaledBitmap = originalBitmap.scale(calculatedWidth, calculatedHeight)
                     val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
-                    insertImage(scaledBitmap, fileName)?.let {
-                        handleOpenGallery(it)
-                    }
+                    handleOpenGallery(insertImage(scaledBitmap, fileName))
                 } else {
                     Toast.makeText(this, "Problem with received image", Toast.LENGTH_LONG).show()
                 }
+            } catch (exception: IOException) {
+                Toast.makeText(this, "${getString(R.string.image_export_failed)} ${exception.localizedMessage.orEmpty()}", Toast.LENGTH_LONG).show()
+            } catch (exception: SecurityException) {
+                Toast.makeText(this, "${getString(R.string.image_export_failed)} ${exception.localizedMessage.orEmpty()}", Toast.LENGTH_LONG).show()
             } finally {
                 originalBitmap?.recycle()
                 scaledBitmap?.recycle()
@@ -462,9 +463,7 @@ class MainActivity : ComponentActivity() {
         savedState.getString("selected_video_uri")?.let { selectMedia(Uri.parse(it), isVideo = true) }
     }
 
-    private fun insertImage(source: Bitmap, name: String): Uri? {
-
-        var out: OutputStream? = null
+    private fun insertImage(source: Bitmap, name: String): Uri {
         val cr = applicationContext.contentResolver
         val timestamp = System.currentTimeMillis()
 
@@ -477,22 +476,23 @@ class MainActivity : ComponentActivity() {
         values.put(MediaStore.Images.Media.DATE_ADDED, timestamp)
         values.put(MediaStore.Images.Media.DATE_TAKEN, timestamp)
 
-        var uri: Uri? = null
+        val uri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            ?: throw IOException("Could not create an image in the gallery.")
         try {
-            uri = cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            uri?.let { uri ->
-                out = cr.openOutputStream(uri)
-                out?.let { out ->
-                    source.compress(Bitmap.CompressFormat.JPEG, JPEG_COMPRESSION, out)
+            val output = cr.openOutputStream(uri) ?: throw IOException("Could not open the output image.")
+            output.use {
+                if (!source.compress(Bitmap.CompressFormat.JPEG, JPEG_COMPRESSION, it)) {
+                    throw IOException("Could not encode the output image.")
                 }
             }
-        } catch (_: Exception) {
-            // do some clean up, something clearly failed
-            uri?.let { cr.delete(it, null, null) }
-        } finally {
-            out?.close()
+        } catch (exception: IOException) {
+            cr.delete(uri, null, null)
+            throw exception
+        } catch (exception: SecurityException) {
+            cr.delete(uri, null, null)
+            throw exception
         }
-        return uri // reference to inserted image
+        return uri
     }
 
     private fun handleOpenGallery(uri: Uri?) {
@@ -501,7 +501,11 @@ class MainActivity : ComponentActivity() {
         uri?.let {
             intent.setDataAndType(it, IMAGE_JPEG)
         } ?: intent.setType(IMAGE_JPEG)
-        startActivity(intent)
+        try {
+            startActivity(intent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.image_saved_no_viewer, Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun handleOpenVideo(uri: Uri) {

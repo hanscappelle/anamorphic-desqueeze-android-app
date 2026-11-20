@@ -24,6 +24,7 @@
     <string name="custom_letterbox_ratio_label">Custom width-to-height ratio</string>
     <string name="error_letterbox_ratio">The target ratio must be at least as wide as the original and leave at least one visible pixel.</string>
     <string name="image_export_failed">Could not export image.</string>
+    <string name="image_saved_no_viewer">Image saved, but no app is available to view it.</string>
     <string name="action_letterbox">Add black bars</string>
     <string name="ratio_description">Choose the horizontal stretch for your lens.</string>
     <string name="ratio_1_33">1.33×</string>
