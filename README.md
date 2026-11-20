@@ -8,6 +8,10 @@ Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
 <img alt="app feature image" src="https://github.com/hanscappelle/anamorphic-desqueeze-android-app/blob/main/screenshots/2znfVZxAjJ9I_1024_500.png"/>
 
+## Screenshot
+
+<img src="screenshots/app-screen.png" alt="App showing black bars settings and video export progress" width="360" />
+
 ## How to Use
 
 - Tap **Choose image or video** and select media, or share an image or video from your gallery to this app.
