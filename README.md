@@ -37,6 +37,10 @@ Currently very basic implementation
 
 - Configuration for export format (and compression ratio in case of JPEG)
 
+### 2.0
+
+- support for video
+
 ### 1.0 
 
 - simplify app versioning
