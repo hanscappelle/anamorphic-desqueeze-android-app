@@ -1,6 +1,7 @@
 package be.hcpl.android.photofilters
 
 import android.content.ContentValues
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,15 +9,34 @@ import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.scale
+import androidx.lifecycle.Observer
+import androidx.media3.common.MediaItem
+import androidx.media3.effect.ScaleAndRotateTransformation
+import androidx.media3.transformer.Composition
+import androidx.media3.transformer.EditedMediaItem
+import androidx.media3.transformer.Effects
+import androidx.media3.transformer.ExportException
+import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.ProgressHolder
+import androidx.media3.transformer.Transformer
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.lang.Float.parseFloat
 import kotlin.getValue
@@ -25,33 +45,55 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel()
 
-    private var imageConfig: ImageConfig = ImageConfig()
+    private var mediaConfig by mutableStateOf(MediaConfig())
+    private val exportHandler = Handler(Looper.getMainLooper())
+    private var videoTransformer: Transformer? = null
+    private var videoOutputFile: File? = null
+    private var progressRunnable: Runnable? = null
+    private var exportCancelled = false
+    private var pendingExport: (() -> Unit)? = null
+    private val stateObserver = Observer<MainViewModel.State>(::handleNewState)
+
+    private val writePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val export = pendingExport
+            pendingExport = null
+            if (granted) {
+                export?.invoke()
+            } else {
+                Toast.makeText(
+                    this,
+                    R.string.video_export_permission_required,
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        updateContent()
-        handleReceivedContent() // checks for received images
-        viewModel.state.observeForever(::handleNewState)
+        setAppContent()
+        handleReceivedContent()
+        viewModel.state.observeForever(stateObserver)
     }
 
     private fun handleNewState(state: MainViewModel.State) {
-        imageConfig = imageConfig.copy(
+        mediaConfig = mediaConfig.copy(
             aspectRatio = state.lastUsedRatio,
         )
-        updateContent()
     }
 
-    private fun updateContent() {
+    private fun setAppContent() {
         setContent {
             AppScaffold(
                 title = stringResource(R.string.app_name)
             ) {
                 DesqueezeAppContent(
-                    content = imageConfig,
+                    content = mediaConfig,
                     onGallery = { handleOpenGallery(null) },
                     selectRatio = ::updateRatio,
-                    onResize = ::handleResizeImage,
+                    onResize = ::handleResizeMedia,
+                    onCancelExport = ::cancelVideoExport,
                 )
             }
         }
@@ -64,19 +106,41 @@ class MainActivity : ComponentActivity() {
         } catch (_: NumberFormatException) {
             0f
         }
-        imageConfig = imageConfig.copy(aspectRatio = newRatio)
-        updateContent()
+        mediaConfig = mediaConfig.copy(aspectRatio = newRatio)
         viewModel.updateLastUsedRatio(newRatio)
+    }
+
+    private fun handleResizeMedia() {
+        if (!mediaConfig.aspectRatio.isFinite() || mediaConfig.aspectRatio <= 0f) {
+            Toast.makeText(this, R.string.error_invalid_ratio, Toast.LENGTH_LONG).show()
+            return
+        }
+        when {
+            mediaConfig.imageUrl != null -> handleResizeImage()
+            mediaConfig.videoUrl != null -> requestVideoExportPermission()
+        }
+    }
+
+    private fun requestVideoExportPermission() {
+        if (VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+            checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            pendingExport = ::startVideoExport
+            writePermissionLauncher.launch(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            startVideoExport()
+        }
     }
 
     private fun handleResizeImage() {
         // TODO move to viewModel
-        imageConfig.imageUrl?.let { imageUri ->
+        mediaConfig.imageUrl?.let { imageUri ->
             var originalBitmap: Bitmap? = null
             var scaledBitmap: Bitmap? = null
             try {
                 originalBitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(imageUri))
-                val calculatedWidth = (originalBitmap.width * imageConfig.aspectRatio).toInt()
+                val calculatedWidth = (originalBitmap.width * mediaConfig.aspectRatio).toInt()
                 val calculatedHeight = originalBitmap.height
                 // keep height, change width by distortion value
                 if (calculatedWidth > 0 && calculatedHeight > 0) {
@@ -92,29 +156,161 @@ class MainActivity : ComponentActivity() {
                 originalBitmap?.recycle()
                 scaledBitmap?.recycle()
                 // remove image content set before
-                imageConfig = ImageConfig()
-                updateContent()
+                mediaConfig = MediaConfig(aspectRatio = mediaConfig.aspectRatio)
             }
         }
+    }
+
+    private fun startVideoExport() {
+        val sourceUri = mediaConfig.videoUrl ?: return
+        val outputFile = File(cacheDir, "desqueezed_${System.currentTimeMillis()}.mp4")
+        videoOutputFile = outputFile
+        exportCancelled = false
+        mediaConfig = mediaConfig.copy(exportProgress = 0)
+
+        try {
+            val editedMediaItem = EditedMediaItem.Builder(MediaItem.fromUri(sourceUri))
+                .setEffects(
+                    Effects(
+                        emptyList(),
+                        listOf(
+                            ScaleAndRotateTransformation.Builder()
+                                .setScale(mediaConfig.aspectRatio, 1f)
+                                .build()
+                        ),
+                    )
+                )
+                .build()
+            val transformer = Transformer.Builder(this)
+                .addListener(
+                    object : Transformer.Listener {
+                        override fun onCompleted(composition: Composition, result: ExportResult) {
+                            if (exportCancelled) return
+                            stopProgressUpdates()
+                            videoTransformer = null
+                            try {
+                                val savedUri = saveVideoToGallery(outputFile)
+                                outputFile.delete()
+                                videoOutputFile = null
+                                mediaConfig = MediaConfig(aspectRatio = mediaConfig.aspectRatio)
+                                handleOpenVideo(savedUri)
+                            } catch (exception: Exception) {
+                                handleVideoExportFailure(exception)
+                            }
+                        }
+
+                        override fun onError(
+                            composition: Composition,
+                            result: ExportResult,
+                            exception: ExportException,
+                        ) {
+                            if (!exportCancelled) handleVideoExportFailure(exception)
+                        }
+                    }
+                )
+                .build()
+            videoTransformer = transformer
+            transformer.start(editedMediaItem, outputFile.absolutePath)
+            monitorExportProgress(transformer)
+        } catch (exception: Exception) {
+            handleVideoExportFailure(exception)
+        }
+    }
+
+    private fun monitorExportProgress(transformer: Transformer) {
+        val runnable = object : Runnable {
+            override fun run() {
+                if (videoTransformer !== transformer) return
+                val progressHolder = ProgressHolder()
+                if (transformer.getProgress(progressHolder) == Transformer.PROGRESS_STATE_AVAILABLE) {
+                    mediaConfig = mediaConfig.copy(exportProgress = progressHolder.progress)
+                }
+                exportHandler.postDelayed(this, 500)
+            }
+        }
+        progressRunnable = runnable
+        exportHandler.post(runnable)
+    }
+
+    private fun cancelVideoExport() {
+        exportCancelled = true
+        stopProgressUpdates()
+        videoTransformer?.cancel()
+        videoTransformer = null
+        videoOutputFile?.delete()
+        videoOutputFile = null
+        mediaConfig = mediaConfig.copy(exportProgress = null)
+        Toast.makeText(this, R.string.video_export_cancelled, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun handleVideoExportFailure(exception: Exception) {
+        stopProgressUpdates()
+        videoTransformer = null
+        videoOutputFile?.delete()
+        videoOutputFile = null
+        mediaConfig = mediaConfig.copy(exportProgress = null)
+        Toast.makeText(
+            this,
+            "${getString(R.string.video_export_failed)} ${exception.localizedMessage.orEmpty()}",
+            Toast.LENGTH_LONG,
+        ).show()
+    }
+
+    private fun stopProgressUpdates() {
+        progressRunnable?.let(exportHandler::removeCallbacks)
+        progressRunnable = null
+    }
+
+    private fun saveVideoToGallery(source: File): Uri {
+        val fileName = "${PREFIX}_${System.currentTimeMillis()}.mp4"
+        val values = ContentValues().apply {
+            put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+            if (VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(
+                    MediaStore.Video.Media.RELATIVE_PATH,
+                    "${Environment.DIRECTORY_MOVIES}/AnamorphicDesqueeze",
+                )
+                put(MediaStore.Video.Media.IS_PENDING, 1)
+            }
+        }
+        val uri = contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values)
+            ?: throw IOException("Could not create a gallery entry for the video.")
+        try {
+            val output = contentResolver.openOutputStream(uri)
+                ?: throw IOException("Could not open the gallery entry for writing.")
+            output.use { stream ->
+                source.inputStream().use { input -> input.copyTo(stream) }
+            }
+            if (VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val published = ContentValues().apply {
+                    put(MediaStore.Video.Media.IS_PENDING, 0)
+                }
+                if (contentResolver.update(uri, published, null, null) == 0) {
+                    throw IOException("Could not publish the exported video.")
+                }
+            }
+        } catch (exception: Exception) {
+            contentResolver.delete(uri, null, null)
+            throw exception
+        }
+        return uri
     }
 
     private fun handleReceivedContent() {
         when {
             intent?.action == Intent.ACTION_SEND -> {
                 if (intent.type?.startsWith(INTENT_TYPE_ALL_IMAGE) == true) {
-                    handleReceivedImage(intent) // Handle single image being sent
+                    handleReceivedMedia(intent, isVideo = false)
+                } else if (intent.type?.startsWith(INTENT_TYPE_ALL_VIDEO) == true) {
+                    handleReceivedMedia(intent, isVideo = true)
                 }
             }
-            // TODO support multiple images in future release
-            //intent?.action == Intent.ACTION_SEND_MULTIPLE
-            //        && intent.type?.startsWith("image/") == true -> {
-            //    handleSendMultipleImages(intent) // Handle multiple images being sent
-            //}
             else -> Unit // Handle other intents, such as being started from the home screen
         }
     }
 
-    private fun handleReceivedImage(intent: Intent) {
+    private fun handleReceivedMedia(intent: Intent, isVideo: Boolean) {
         // TODO move to viewModel
         val uri = if (VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(Intent.EXTRA_STREAM, Parcelable::class.java) as? Uri
@@ -123,8 +319,11 @@ class MainActivity : ComponentActivity() {
             intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri
         }
         uri?.let {
-            imageConfig = ImageConfig(imageUrl = it)
-            updateContent()
+            mediaConfig = if (isVideo) {
+                MediaConfig(videoUrl = it)
+            } else {
+                MediaConfig(imageUrl = it)
+            }
         }
     }
 
@@ -168,6 +367,27 @@ class MainActivity : ComponentActivity() {
             intent.setDataAndType(it, IMAGE_JPEG)
         } ?: intent.setType(IMAGE_JPEG)
         startActivity(intent)
+    }
+
+    private fun handleOpenVideo(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "video/mp4")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        try {
+            startActivity(intent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.video_saved_no_player, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onDestroy() {
+        exportCancelled = true
+        stopProgressUpdates()
+        videoTransformer?.cancel()
+        videoOutputFile?.delete()
+        viewModel.state.removeObserver(stateObserver)
+        super.onDestroy()
     }
 
 }

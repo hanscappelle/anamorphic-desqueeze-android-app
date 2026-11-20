@@ -1,13 +1,20 @@
 <resources>
     <string name="app_name">AnamorphicDesqueeze</string>
-    <string name="info_about_app">This app allows you to change the aspect ratio of any image. Ideal for desqueezing pictures taken with an anamorphic lens.</string>
+    <string name="info_about_app">This app changes the aspect ratio of images and videos. Ideal for desqueezing media taken with an anamorphic lens.</string>
     <string name="info_how_to_use">
-        1. Start from your typical image gallery and use the share option selecting this app to open the image with.
-        \n\n2. Landing in this app again, select the desired image ratio and execute the resize.
-        \n\n3. Finally you\'ll find the result in your preferred gallery app.</string>
+        1. From your gallery, share an image or video and select this app.
+        \n\n2. Select the desired desqueeze ratio and start the export.
+        \n\n3. Find the result in your gallery app.</string>
     <string name="contentDescription_sample_image">sample image</string>
     <string name="title_how_to_use">How to use this App</string>
     <string name="action_desqueeze">Desqueeze</string>
+    <string name="action_cancel_export">Cancel export</string>
+    <string name="video_export_progress">Exporting video: %1$d%%</string>
+    <string name="video_export_failed">Could not export video.</string>
+    <string name="video_export_cancelled">Video export cancelled.</string>
+    <string name="video_export_permission_required">Storage permission is required to save this video.</string>
+    <string name="video_saved_no_player">Video saved, but no app is available to play it.</string>
+    <string name="error_invalid_ratio">Enter a positive aspect ratio.</string>
     <string name="action_open_gallery">Open Gallery</string>
     <string name="contentDescription_screenshot_01">Open gallery and select share</string>
     <string name="contentDescription_screenshot_02">From image share option select this app</string>

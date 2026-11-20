@@ -1,10 +1,10 @@
 # Anamorphic Desqueeze App
 
-Simple open source Android app to change the aspect ratio of any image using default intents.
+Simple open source Android app to change the aspect ratio of images and videos using default intents.
 
-This app allows you to pick any image from your preferred Android Image Gallery and share it directly into this app resulting in a newly generated, desqueezed image in your Gallery.
+This app allows you to share an image or short video from your preferred Android Gallery App directly into this app, resulting in newly generated, desqueezed media in your Gallery App of choice.
 
-For this the width of the original image is multiplied by 1.33 to get the full image width. Current release is limited to images (not video) and has a fixed 1.33 ratio and 85% JPEG output. Future releases may introduce more settings to control this.
+For images, the width of the original is multiplied by the selected ratio. Videos are re-encoded with the same horizontal scaling while retaining their audio. Video exports are MP4 files; their duration affects export time, battery use, and storage requirements.
 
 Google Play Store: https://play.google.com/store/apps/details?id=be.hcpl.android.photofilters
 
@@ -16,17 +16,19 @@ Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
 To use this app:
 
-- Start from your typical image gallery and use the share option selecting this app to open the image with.
-- Landing in this app again, select the desired image ratio and execute the resize.
+- From your gallery, share an image or video and select this app.
+- Select the desired ratio and start the desqueeze/export.
 - Finally you\'ll find the result in your preferred gallery app.
 
 ## Features
 
 Currently very basic implementation
 
-- Open an image from your preferred Image Gallery using default Android Intent
+- Open an image from your preferred image gallery using Android's share intent
+- Open a video from a compatible app using Android's share intent
 - Desqueeze to preferred aspect ratio of width*ratio x height
 - Fixed JPEG full original size 85% compression
+- Export desqueezed videos as MP4 with audio preserved, progress, and cancellation
 - Opens result in Gallery
 
 ## Version History

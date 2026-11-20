@@ -4,6 +4,7 @@ const val IMAGE_JPEG = "image/jpeg"
 const val PREFIX = "Desqueezed"
 const val EXT_JPEG = "JPEG"
 const val INTENT_TYPE_ALL_IMAGE = "image/"
+const val INTENT_TYPE_ALL_VIDEO = "video/"
 
 const val JPEG_COMPRESSION = 85
 

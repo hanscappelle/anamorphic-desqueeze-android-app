@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,9 +31,10 @@ import be.hcpl.android.photofilters.ui.theme.AnamorphicDesqueezeTheme
 @Composable
 fun DesqueezeAppContent(
     modifier: Modifier = Modifier,
-    content: ImageConfig = ImageConfig(),
+    content: MediaConfig = MediaConfig(),
     onGallery: () -> Unit = {},
     onResize: () -> Unit = {},
+    onCancelExport: () -> Unit = {},
     selectRatio: (String) -> Unit = {},
 ) {
     LazyColumn(
@@ -55,10 +57,21 @@ fun DesqueezeAppContent(
         }
         item {
             // action depends on image selected or not
-            if (content.imageUrl == null) {
+            if (content.imageUrl == null && content.videoUrl == null) {
                 OpenGalleryAction(onGallery)
             } else {
-                DesqueezeAction(content, onResize, selectRatio)
+                DesqueezeAction(content, onResize, onCancelExport, selectRatio)
+            }
+        }
+        if (content.exportProgress != null) {
+            item {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.video_export_progress, content.exportProgress))
+                    LinearProgressIndicator(
+                        progress = { content.exportProgress / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
         }
         item {
@@ -67,9 +80,11 @@ fun DesqueezeAppContent(
     }
 }
 
-data class ImageConfig(
+data class MediaConfig(
     val imageUrl: Uri? = null,
+    val videoUrl: Uri? = null,
     val aspectRatio: Float = ASPECT_RATIO_DEFAULT,
+    val exportProgress: Int? = null,
 )
 
 @Composable
@@ -118,8 +133,9 @@ fun OpenGalleryAction(
 
 @Composable
 fun DesqueezeAction(
-    content: ImageConfig,
+    content: MediaConfig,
     onResize: () -> Unit,
+    onCancelExport: () -> Unit,
     selectRatio: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -140,9 +156,16 @@ fun DesqueezeAction(
             )
         }
         Button(
-            onClick = { onResize() },
+            onClick = {
+                if (content.exportProgress != null) onCancelExport() else onResize()
+            },
         ) {
-            Text(stringResource(R.string.action_desqueeze))
+            Text(
+                stringResource(
+                    if (content.exportProgress != null) R.string.action_cancel_export
+                    else R.string.action_desqueeze
+                )
+            )
         }
     }
 }
@@ -200,6 +223,6 @@ fun DesqueezeImage(
 @Composable
 fun GreetingPreview() {
     AnamorphicDesqueezeTheme {
-        DesqueezeAppContent(content = ImageConfig(imageUrl = Uri.EMPTY))
+        DesqueezeAppContent(content = MediaConfig(imageUrl = Uri.EMPTY))
     }
 }
