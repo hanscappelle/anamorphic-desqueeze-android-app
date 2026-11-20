@@ -5,6 +5,10 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Matrix
+import android.media.ExifInterface
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
@@ -23,11 +27,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.scale
 import androidx.lifecycle.Observer
 import androidx.media3.common.MediaItem
 import androidx.media3.effect.ScaleAndRotateTransformation
+import androidx.media3.effect.OverlayEffect
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.Effects
@@ -112,6 +116,10 @@ class MainActivity : ComponentActivity() {
                     content = mediaConfig,
                     onGallery = ::openMediaPicker,
                     selectRatio = ::updateRatio,
+                    selectMode = { mediaConfig = mediaConfig.copy(mode = it) },
+                    selectLetterboxRatio = {
+                        mediaConfig = mediaConfig.copy(letterboxRatio = it.toFloatOrNull() ?: 0f)
+                    },
                     onResize = ::handleResizeMedia,
                     onCancelExport = ::cancelVideoExport,
                 )
@@ -139,13 +147,63 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleResizeMedia() {
-        if (!mediaConfig.aspectRatio.isFinite() || mediaConfig.aspectRatio <= 0f) {
+        val ratio = if (mediaConfig.mode == ConversionMode.LETTERBOX) {
+            mediaConfig.letterboxRatio
+        } else {
+            mediaConfig.aspectRatio
+        }
+        if (!ratio.isFinite() || ratio <= 0f) {
             Toast.makeText(this, R.string.error_invalid_ratio, Toast.LENGTH_LONG).show()
             return
         }
         when {
+            mediaConfig.imageUrl != null && mediaConfig.mode == ConversionMode.LETTERBOX -> handleLetterboxImage()
             mediaConfig.imageUrl != null -> handleResizeImage()
             mediaConfig.videoUrl != null -> requestVideoExportPermission()
+        }
+    }
+
+    private fun handleLetterboxImage() {
+        val uri = mediaConfig.imageUrl ?: return
+        var decoded: Bitmap? = null
+        var oriented: Bitmap? = null
+        var output: Bitmap? = null
+        try {
+            val orientation = contentResolver.openInputStream(uri)?.use {
+                ExifInterface(it).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+            } ?: throw IOException("Could not open the image.")
+            decoded = contentResolver.openInputStream(uri)?.use(BitmapFactory::decodeStream)
+                ?: throw IOException("Could not decode the image.")
+            val matrix = Matrix().apply {
+                when (orientation) {
+                    ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> setScale(-1f, 1f)
+                    ExifInterface.ORIENTATION_ROTATE_180 -> setRotate(180f)
+                    ExifInterface.ORIENTATION_FLIP_VERTICAL -> setScale(1f, -1f)
+                    ExifInterface.ORIENTATION_TRANSPOSE -> { setRotate(90f); postScale(-1f, 1f) }
+                    ExifInterface.ORIENTATION_ROTATE_90 -> setRotate(90f)
+                    ExifInterface.ORIENTATION_TRANSVERSE -> { setRotate(-90f); postScale(-1f, 1f) }
+                    ExifInterface.ORIENTATION_ROTATE_270 -> setRotate(270f)
+                }
+            }
+            oriented = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
+            calculateLetterboxBars(oriented.width, oriented.height, mediaConfig.letterboxRatio)
+            output = oriented.copy(Bitmap.Config.ARGB_8888, true)
+                ?: throw IOException("Could not create an output image.")
+            drawLetterboxBars(Canvas(output), mediaConfig.letterboxRatio)
+            val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
+            val savedUri = insertImage(output, fileName) ?: throw IOException("Could not save the image.")
+            mediaConfig = mediaConfig.copy(imageUrl = null, videoUrl = null)
+            handleOpenGallery(savedUri)
+        } catch (_: InvalidLetterboxRatioException) {
+            Toast.makeText(this, R.string.error_letterbox_ratio, Toast.LENGTH_LONG).show()
+        } catch (exception: IOException) {
+            Toast.makeText(this, "${getString(R.string.image_export_failed)} ${exception.localizedMessage.orEmpty()}", Toast.LENGTH_LONG).show()
+        } catch (exception: SecurityException) {
+            Toast.makeText(this, "${getString(R.string.image_export_failed)} ${exception.localizedMessage.orEmpty()}", Toast.LENGTH_LONG).show()
+        } finally {
+            if (output !== oriented && output !== decoded) output?.recycle()
+            if (oriented !== decoded) oriented?.recycle()
+            decoded?.recycle()
         }
     }
 
@@ -184,7 +242,7 @@ class MainActivity : ComponentActivity() {
                 originalBitmap?.recycle()
                 scaledBitmap?.recycle()
                 // remove image content set before
-                mediaConfig = MediaConfig(aspectRatio = mediaConfig.aspectRatio)
+                mediaConfig = mediaConfig.copy(imageUrl = null, videoUrl = null)
             }
         }
     }
@@ -197,15 +255,19 @@ class MainActivity : ComponentActivity() {
         mediaConfig = mediaConfig.copy(exportProgress = 0)
 
         try {
+            val videoEffect = if (mediaConfig.mode == ConversionMode.LETTERBOX) {
+                validateVideoLetterbox(sourceUri, mediaConfig.letterboxRatio)
+                OverlayEffect(listOf(LetterboxOverlay(mediaConfig.letterboxRatio)))
+            } else {
+                ScaleAndRotateTransformation.Builder()
+                    .setScale(mediaConfig.aspectRatio, 1f)
+                    .build()
+            }
             val editedMediaItem = EditedMediaItem.Builder(MediaItem.fromUri(sourceUri))
                 .setEffects(
                     Effects(
                         emptyList(),
-                        listOf(
-                            ScaleAndRotateTransformation.Builder()
-                                .setScale(mediaConfig.aspectRatio, 1f)
-                                .build()
-                        ),
+                        listOf(videoEffect),
                     )
                 )
                 .build()
@@ -220,7 +282,7 @@ class MainActivity : ComponentActivity() {
                                 val savedUri = saveVideoToGallery(outputFile)
                                 outputFile.delete()
                                 videoOutputFile = null
-                                mediaConfig = MediaConfig(aspectRatio = mediaConfig.aspectRatio)
+                                mediaConfig = mediaConfig.copy(imageUrl = null, videoUrl = null, exportProgress = null)
                                 handleOpenVideo(savedUri)
                             } catch (exception: Exception) {
                                 handleVideoExportFailure(exception)
@@ -240,8 +302,32 @@ class MainActivity : ComponentActivity() {
             videoTransformer = transformer
             transformer.start(editedMediaItem, outputFile.absolutePath)
             monitorExportProgress(transformer)
+        } catch (_: InvalidLetterboxRatioException) {
+            videoOutputFile?.delete()
+            videoOutputFile = null
+            mediaConfig = mediaConfig.copy(exportProgress = null)
+            Toast.makeText(this, R.string.error_letterbox_ratio, Toast.LENGTH_LONG).show()
         } catch (exception: Exception) {
             handleVideoExportFailure(exception)
+        }
+    }
+
+    private fun validateVideoLetterbox(uri: Uri, ratio: Float) {
+        val retriever = MediaMetadataRetriever()
+        try {
+            retriever.setDataSource(this, uri)
+            val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
+                ?: throw IOException("Could not read the video width.")
+            val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+                ?: throw IOException("Could not read the video height.")
+            val rotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+            if (rotation == 90 || rotation == 270) {
+                calculateLetterboxBars(height, width, ratio)
+            } else {
+                calculateLetterboxBars(width, height, ratio)
+            }
+        } finally {
+            retriever.release()
         }
     }
 
@@ -362,9 +448,16 @@ class MainActivity : ComponentActivity() {
         super.onSaveInstanceState(outState)
         outState.putString("selected_image_uri", mediaConfig.imageUrl?.toString())
         outState.putString("selected_video_uri", mediaConfig.videoUrl?.toString())
+        outState.putString("conversion_mode", mediaConfig.mode.name)
+        outState.putFloat("letterbox_ratio", mediaConfig.letterboxRatio)
     }
 
     private fun restoreSelectedMedia(savedState: Bundle) {
+        val mode = when (savedState.getString("conversion_mode")) {
+            ConversionMode.LETTERBOX.name -> ConversionMode.LETTERBOX
+            else -> ConversionMode.DESQUEEZE
+        }
+        mediaConfig = mediaConfig.copy(mode = mode, letterboxRatio = savedState.getFloat("letterbox_ratio", 2.39f))
         savedState.getString("selected_image_uri")?.let { selectMedia(Uri.parse(it), isVideo = false) }
         savedState.getString("selected_video_uri")?.let { selectMedia(Uri.parse(it), isVideo = true) }
     }

@@ -4,7 +4,7 @@
     <string name="info_about_app">This app changes the aspect ratio of images and videos. Ideal for desqueezing media taken with an anamorphic lens.</string>
     <string name="info_how_to_use">
         1. Choose an image or video here, or share one from your gallery to this app.
-        \n\n2. Select the desired desqueeze ratio and start the export.
+        \n\n2. Choose desqueeze or letterbox, select a ratio, and start the export.
         \n\n3. Find the result in your gallery app.</string>
     <string name="contentDescription_sample_image">sample image</string>
     <string name="title_how_to_use">How to use</string>
@@ -14,6 +14,17 @@
     <string name="media_heading">Your media</string>
     <string name="media_not_selected">Choose an image or video, or share one to this app.</string>
     <string name="ratio_heading">Desqueeze ratio</string>
+    <string name="mode_heading">Conversion</string>
+    <string name="mode_desqueeze">Desqueeze</string>
+    <string name="mode_letterbox">Black bars</string>
+    <string name="letterbox_heading">Visible picture ratio</string>
+    <string name="letterbox_description">Keep the original canvas and cover the top and bottom with black bars. The covered picture will be lost in the exported file.</string>
+    <string name="ratio_2_39">2.39:1</string>
+    <string name="ratio_2_35">2.35:1</string>
+    <string name="custom_letterbox_ratio_label">Custom width-to-height ratio</string>
+    <string name="error_letterbox_ratio">The target ratio must be at least as wide as the original and leave at least one visible pixel.</string>
+    <string name="image_export_failed">Could not export image.</string>
+    <string name="action_letterbox">Add black bars</string>
     <string name="ratio_description">Choose the horizontal stretch for your lens.</string>
     <string name="ratio_1_33">1.33×</string>
     <string name="ratio_1_55">1.55×</string>

@@ -6,6 +6,8 @@ Choose an image or short video from within the app, or share one from your prefe
 
 For images, the width of the original is multiplied by the selected ratio. Videos are re-encoded with the same horizontal scaling while retaining their audio. Video exports are MP4 files; their duration affects export time, battery use, and storage requirements.
 
+Alternatively, black-bars mode keeps the original canvas and picture proportions, covering the top and bottom to produce a 2.39:1, 2.35:1, or custom visible picture ratio. Covered content is lost in the export. The target ratio must be at least as wide as the source.
+
 Google Play Store: https://play.google.com/store/apps/details?id=be.hcpl.android.photofilters
 
 Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
@@ -17,7 +19,7 @@ Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 To use this app:
 
 - Tap **Choose image or video** and select media, or share an image or video from your gallery to this app.
-- Select the desired ratio and start the desqueeze/export.
+- Choose desqueeze or black bars, select the desired ratio, and start the export.
 - Find the result in your preferred gallery app.
 
 ## Features
@@ -28,6 +30,7 @@ Currently very basic implementation
 - Open a video from a compatible app using Android's share intent
 - Choose an image or video using the system photo picker
 - Desqueeze to preferred aspect ratio of width*ratio x height
+- Add black bars to images or videos for a cinematic visible picture ratio
 - Fixed JPEG full original size 85% compression
 - Export desqueezed videos as MP4 with audio preserved, progress, and cancellation
 - Opens result in Gallery

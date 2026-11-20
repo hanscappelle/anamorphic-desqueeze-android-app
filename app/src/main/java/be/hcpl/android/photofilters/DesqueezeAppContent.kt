@@ -44,8 +44,12 @@ data class MediaConfig(
     val imageUrl: Uri? = null,
     val videoUrl: Uri? = null,
     val aspectRatio: Float = ASPECT_RATIO_DEFAULT,
+    val mode: ConversionMode = ConversionMode.DESQUEEZE,
+    val letterboxRatio: Float = 2.39f,
     val exportProgress: Int? = null,
 )
+
+enum class ConversionMode { DESQUEEZE, LETTERBOX }
 
 @Composable
 fun DesqueezeAppContent(
@@ -55,6 +59,8 @@ fun DesqueezeAppContent(
     onResize: () -> Unit = {},
     onCancelExport: () -> Unit = {},
     selectRatio: (String) -> Unit = {},
+    selectMode: (ConversionMode) -> Unit = {},
+    selectLetterboxRatio: (String) -> Unit = {},
 ) {
     val hasMedia = content.imageUrl != null || content.videoUrl != null
     val exporting = content.exportProgress != null
@@ -110,6 +116,8 @@ fun DesqueezeAppContent(
                 RatioCard(
                     content = content,
                     selectRatio = selectRatio,
+                    selectMode = selectMode,
+                    selectLetterboxRatio = selectLetterboxRatio,
                     onResize = onResize,
                     onCancelExport = onCancelExport,
                 )
@@ -150,6 +158,8 @@ fun DesqueezeAppContent(
 private fun RatioCard(
     content: MediaConfig,
     selectRatio: (String) -> Unit,
+    selectMode: (ConversionMode) -> Unit,
+    selectLetterboxRatio: (String) -> Unit,
     onResize: () -> Unit,
     onCancelExport: () -> Unit,
 ) {
@@ -166,18 +176,71 @@ private fun RatioCard(
             isCustom = true
         }
     }
+    val letterboxIsCustom = content.letterboxRatio != 2.39f && content.letterboxRatio != 2.35f
+    var customLetterboxSelected by rememberSaveable { mutableStateOf(letterboxIsCustom) }
+    var customLetterbox by rememberSaveable {
+        mutableStateOf(if (letterboxIsCustom) content.letterboxRatio.toString() else "2.0")
+    }
 
     Card(modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth()) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(stringResource(R.string.ratio_heading), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.mode_heading), style = MaterialTheme.typography.titleMedium)
+            Column(modifier = Modifier.selectableGroup()) {
+                RatioOption(
+                    label = stringResource(R.string.mode_desqueeze),
+                    selected = content.mode == ConversionMode.DESQUEEZE,
+                    enabled = !exporting,
+                    onSelect = { selectMode(ConversionMode.DESQUEEZE) },
+                )
+                RatioOption(
+                    label = stringResource(R.string.mode_letterbox),
+                    selected = content.mode == ConversionMode.LETTERBOX,
+                    enabled = !exporting,
+                    onSelect = { selectMode(ConversionMode.LETTERBOX) },
+                )
+            }
             Text(
-                stringResource(R.string.ratio_description),
+                stringResource(if (content.mode == ConversionMode.LETTERBOX) R.string.letterbox_heading else R.string.ratio_heading),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                stringResource(if (content.mode == ConversionMode.LETTERBOX) R.string.letterbox_description else R.string.ratio_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            if (content.mode == ConversionMode.LETTERBOX) {
+                Column(modifier = Modifier.selectableGroup()) {
+                    RatioOption(stringResource(R.string.ratio_2_39), !customLetterboxSelected && content.letterboxRatio == 2.39f, !exporting) {
+                        customLetterboxSelected = false
+                        selectLetterboxRatio("2.39")
+                    }
+                    RatioOption(stringResource(R.string.ratio_2_35), !customLetterboxSelected && content.letterboxRatio == 2.35f, !exporting) {
+                        customLetterboxSelected = false
+                        selectLetterboxRatio("2.35")
+                    }
+                    RatioOption(stringResource(R.string.ratio_custom), customLetterboxSelected, !exporting) {
+                        customLetterboxSelected = true
+                        selectLetterboxRatio(customLetterbox)
+                    }
+                }
+                if (customLetterboxSelected) {
+                    OutlinedTextField(
+                        value = customLetterbox,
+                        onValueChange = {
+                            customLetterbox = it
+                            selectLetterboxRatio(it)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !exporting,
+                        label = { Text(stringResource(R.string.custom_letterbox_ratio_label)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                    )
+                }
+            } else {
             Column(modifier = Modifier.selectableGroup()) {
                 RatioOption(
                     label = stringResource(R.string.ratio_1_33),
@@ -221,6 +284,7 @@ private fun RatioCard(
                     singleLine = true,
                 )
             }
+            }
             if (content.exportProgress != null) {
                 Text(
                     stringResource(R.string.video_export_progress, content.exportProgress),
@@ -235,7 +299,11 @@ private fun RatioCard(
                 onClick = if (exporting) onCancelExport else onResize,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(stringResource(if (exporting) R.string.action_cancel_export else R.string.action_desqueeze))
+                Text(stringResource(when {
+                    exporting -> R.string.action_cancel_export
+                    content.mode == ConversionMode.LETTERBOX -> R.string.action_letterbox
+                    else -> R.string.action_desqueeze
+                }))
             }
         }
     }
