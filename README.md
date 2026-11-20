@@ -1,8 +1,8 @@
 # Anamorphic Desqueeze App
 
-Simple open source Android app to change the aspect ratio of images and videos using default intents.
+Simple open source Android app to change the aspect ratio of images and videos.
 
-This app allows you to share an image or short video from your preferred Android Gallery App directly into this app, resulting in newly generated, desqueezed media in your Gallery App of choice.
+Choose an image or short video from within the app, or share one from your preferred Android gallery. The app creates newly desqueezed media in your gallery.
 
 For images, the width of the original is multiplied by the selected ratio. Videos are re-encoded with the same horizontal scaling while retaining their audio. Video exports are MP4 files; their duration affects export time, battery use, and storage requirements.
 
@@ -16,9 +16,9 @@ Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 
 To use this app:
 
-- From your gallery, share an image or video and select this app.
+- Tap **Choose image or video** and select media, or share an image or video from your gallery to this app.
 - Select the desired ratio and start the desqueeze/export.
-- Finally you\'ll find the result in your preferred gallery app.
+- Find the result in your preferred gallery app.
 
 ## Features
 
@@ -26,6 +26,7 @@ Currently very basic implementation
 
 - Open an image from your preferred image gallery using Android's share intent
 - Open a video from a compatible app using Android's share intent
+- Choose an image or video using the system photo picker
 - Desqueeze to preferred aspect ratio of width*ratio x height
 - Fixed JPEG full original size 85% compression
 - Export desqueezed videos as MP4 with audio preserved, progress, and cancellation
