@@ -36,7 +36,7 @@
     <string name="video_export_progress">Exporting video: %1$d%%</string>
     <string name="video_export_failed">Could not export video.</string>
     <string name="video_export_cancelled">Video export cancelled.</string>
-    <string name="video_export_permission_required">Storage permission is required to save this video.</string>
+    <string name="export_permission_required">Storage permission is required to save this media.</string>
     <string name="video_saved_no_player">Video saved, but no app is available to play it.</string>
     <string name="error_invalid_ratio">Enter a positive aspect ratio.</string>
     <string name="action_open_gallery">Choose image or video</string>

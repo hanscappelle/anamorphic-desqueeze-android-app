@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
             } else {
                 Toast.makeText(
                     this,
-                    R.string.video_export_permission_required,
+                    R.string.export_permission_required,
                     Toast.LENGTH_LONG,
                 ).show()
             }
@@ -156,9 +156,10 @@ class MainActivity : ComponentActivity() {
             return
         }
         when {
-            mediaConfig.imageUrl != null && mediaConfig.mode == ConversionMode.LETTERBOX -> handleLetterboxImage()
+            mediaConfig.imageUrl != null && mediaConfig.mode == ConversionMode.LETTERBOX ->
+                requestStoragePermission(::handleLetterboxImage)
             mediaConfig.imageUrl != null -> handleResizeImage()
-            mediaConfig.videoUrl != null -> requestVideoExportPermission()
+            mediaConfig.videoUrl != null -> requestStoragePermission(::startVideoExport)
         }
     }
 
@@ -206,15 +207,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun requestVideoExportPermission() {
+    private fun requestStoragePermission(export: () -> Unit) {
         if (VERSION.SDK_INT < Build.VERSION_CODES.Q &&
             checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            pendingExport = ::startVideoExport
+            pendingExport = export
             writePermissionLauncher.launch(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         } else {
-            startVideoExport()
+            export()
         }
     }
 
