@@ -41,6 +41,7 @@ Currently very basic implementation
 ### 2.0
 
 - support for video
+- added image pick option from app
 
 ### 1.0 
 
