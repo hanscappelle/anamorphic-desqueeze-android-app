@@ -107,9 +107,7 @@ class MainActivity : ComponentActivity() {
 
     private fun setAppContent() {
         setContent {
-            AppScaffold(
-                title = stringResource(R.string.app_name)
-            ) {
+            AppScaffold {
                 DesqueezeAppContent(
                     content = mediaConfig,
                     onGallery = ::openMediaPicker,

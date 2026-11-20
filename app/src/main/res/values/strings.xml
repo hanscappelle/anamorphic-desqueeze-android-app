@@ -1,12 +1,24 @@
 <resources>
     <string name="app_name">AnamorphicDesqueeze</string>
+    <string name="toolbar_title">Anamorphic Desqueeze</string>
     <string name="info_about_app">This app changes the aspect ratio of images and videos. Ideal for desqueezing media taken with an anamorphic lens.</string>
     <string name="info_how_to_use">
-        1. Choose an image or video below, or share one from your gallery to this app.
+        1. Choose an image or video here, or share one from your gallery to this app.
         \n\n2. Select the desired desqueeze ratio and start the export.
         \n\n3. Find the result in your gallery app.</string>
     <string name="contentDescription_sample_image">sample image</string>
-    <string name="title_how_to_use">How to use this App</string>
+    <string name="title_how_to_use">How to use</string>
+    <string name="action_view_github">View project on GitHub</string>
+    <string name="error_no_browser">No app is available to open the GitHub link.</string>
+    <string name="screen_heading">Desqueeze your media</string>
+    <string name="media_heading">Your media</string>
+    <string name="media_not_selected">Choose an image or video, or share one to this app.</string>
+    <string name="ratio_heading">Desqueeze ratio</string>
+    <string name="ratio_description">Choose the horizontal stretch for your lens.</string>
+    <string name="ratio_1_33">1.33×</string>
+    <string name="ratio_1_55">1.55×</string>
+    <string name="ratio_custom">Custom</string>
+    <string name="custom_ratio_label">Custom ratio</string>
     <string name="action_desqueeze">Desqueeze</string>
     <string name="action_cancel_export">Cancel export</string>
     <string name="video_export_progress">Exporting video: %1$d%%</string>
@@ -16,6 +28,7 @@
     <string name="video_saved_no_player">Video saved, but no app is available to play it.</string>
     <string name="error_invalid_ratio">Enter a positive aspect ratio.</string>
     <string name="action_open_gallery">Choose image or video</string>
+    <string name="action_change_media">Choose another image or video</string>
     <string name="image_selected">Image selected</string>
     <string name="video_selected">Video selected</string>
     <string name="error_unsupported_media">The selected item is not a supported image or video.</string>
