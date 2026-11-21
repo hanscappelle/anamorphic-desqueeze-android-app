@@ -30,6 +30,16 @@ For images, the width of the original is multiplied by the selected ratio. Video
 
 Alternatively, black-bars mode keeps the original canvas and picture proportions, covering the top and bottom to produce a 2.39:1, 2.35:1, or custom visible picture ratio. Covered content is lost in the export. The target ratio must be at least as wide as the source.
 
+## Common Widescreen & Theatrical Ratios
+
+• 2.39:1 (Anamorphic / Scope): Often referred to around 2.35:1, 2.40:1, or 21:9. Widely used for blockbusters, action, and sweeping landscapes, producing prominent black bars on standard 16:9 TVs.
+• 1.85:1 (Flat Widescreen): A common Hollywood standard for dramas, comedies, and narrative features, resulting in thin black bars on a 16:9 screen.
+• 1.90:1 (Digital IMAX): Used for many large-format and IMAX releases, filling slightly more vertical space than 16:9.
+
+Other Notable Ratios
+
+• 1.66:1: Historically tied to European and independent cinema, offering a balance between widescreen and classic framing.
+
 ## Features
 
 - Open an image from your preferred image gallery using Android's share intent
