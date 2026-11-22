@@ -59,6 +59,11 @@ Other Notable Ratios
 
 ## Version History
 
+### 2.1
+
+- more ratio for letter box
+- crop for socials (square, vertical)
+
 ### 2.0
 
 - support for video
