@@ -119,6 +119,7 @@ class MainActivity : ComponentActivity() {
                     selectLetterboxRatio = {
                         mediaConfig = mediaConfig.copy(letterboxRatio = it.toFloatOrNull() ?: 0f)
                     },
+                    selectCropPreset = { mediaConfig = mediaConfig.copy(cropPreset = it) },
                     onResize = ::handleResizeMedia,
                     onCancelExport = ::cancelVideoExport,
                 )
@@ -146,24 +147,24 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleResizeMedia() {
-        val ratio = if (mediaConfig.mode == ConversionMode.LETTERBOX) {
-            mediaConfig.letterboxRatio
-        } else {
-            mediaConfig.aspectRatio
+        val ratio = when (mediaConfig.mode) {
+            ConversionMode.LETTERBOX -> mediaConfig.letterboxRatio
+            ConversionMode.DESQUEEZE -> mediaConfig.aspectRatio
+            ConversionMode.SOCIAL_CROP -> mediaConfig.cropPreset.width.toFloat() / mediaConfig.cropPreset.height
         }
         if (!ratio.isFinite() || ratio <= 0f) {
             Toast.makeText(this, R.string.error_invalid_ratio, Toast.LENGTH_LONG).show()
             return
         }
         when {
-            mediaConfig.imageUrl != null && mediaConfig.mode == ConversionMode.LETTERBOX ->
-                requestStoragePermission(::handleLetterboxImage)
+            mediaConfig.imageUrl != null && mediaConfig.mode != ConversionMode.DESQUEEZE ->
+                requestStoragePermission(::handleTransformedImage)
             mediaConfig.imageUrl != null -> handleResizeImage()
             mediaConfig.videoUrl != null -> requestStoragePermission(::startVideoExport)
         }
     }
 
-    private fun handleLetterboxImage() {
+    private fun handleTransformedImage() {
         val uri = mediaConfig.imageUrl ?: return
         var decoded: Bitmap? = null
         var oriented: Bitmap? = null
@@ -186,10 +187,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
             oriented = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, matrix, true)
-            calculateLetterboxBars(oriented.width, oriented.height, mediaConfig.letterboxRatio)
-            output = oriented.copy(Bitmap.Config.ARGB_8888, true)
-                ?: throw IOException("Could not create an output image.")
-            drawLetterboxBars(Canvas(output), mediaConfig.letterboxRatio)
+            output = when (mediaConfig.mode) {
+                ConversionMode.LETTERBOX -> {
+                    calculateLetterboxBars(oriented.width, oriented.height, mediaConfig.letterboxRatio)
+                    val result = oriented.copy(Bitmap.Config.ARGB_8888, true)
+                        ?: throw IOException("Could not create an output image.")
+                    drawLetterboxBars(Canvas(result), mediaConfig.letterboxRatio)
+                    result
+                }
+                ConversionMode.SOCIAL_CROP -> cropImage(oriented, mediaConfig.cropPreset)
+                ConversionMode.DESQUEEZE -> throw IllegalStateException("Unexpected image conversion mode.")
+            }
             val fileName = "${PREFIX}_${System.currentTimeMillis()}.${EXT_JPEG}"
             val savedUri = insertImage(output, fileName)
             mediaConfig = mediaConfig.copy(imageUrl = null, videoUrl = null)
@@ -257,11 +265,13 @@ class MainActivity : ComponentActivity() {
         mediaConfig = mediaConfig.copy(exportProgress = 0)
 
         try {
-            val videoEffect = if (mediaConfig.mode == ConversionMode.LETTERBOX) {
-                validateVideoLetterbox(sourceUri, mediaConfig.letterboxRatio)
-                OverlayEffect(listOf(LetterboxOverlay(mediaConfig.letterboxRatio)))
-            } else {
-                ScaleAndRotateTransformation.Builder()
+            val videoEffect = when (mediaConfig.mode) {
+                ConversionMode.LETTERBOX -> {
+                    validateVideoLetterbox(sourceUri, mediaConfig.letterboxRatio)
+                    OverlayEffect(listOf(LetterboxOverlay(mediaConfig.letterboxRatio)))
+                }
+                ConversionMode.SOCIAL_CROP -> socialCropEffect(mediaConfig.cropPreset)
+                ConversionMode.DESQUEEZE -> ScaleAndRotateTransformation.Builder()
                     .setScale(mediaConfig.aspectRatio, 1f)
                     .build()
             }
@@ -452,14 +462,22 @@ class MainActivity : ComponentActivity() {
         outState.putString("selected_video_uri", mediaConfig.videoUrl?.toString())
         outState.putString("conversion_mode", mediaConfig.mode.name)
         outState.putFloat("letterbox_ratio", mediaConfig.letterboxRatio)
+        outState.putString("crop_preset", mediaConfig.cropPreset.name)
     }
 
     private fun restoreSelectedMedia(savedState: Bundle) {
         val mode = when (savedState.getString("conversion_mode")) {
             ConversionMode.LETTERBOX.name -> ConversionMode.LETTERBOX
+            ConversionMode.SOCIAL_CROP.name -> ConversionMode.SOCIAL_CROP
             else -> ConversionMode.DESQUEEZE
         }
-        mediaConfig = mediaConfig.copy(mode = mode, letterboxRatio = savedState.getFloat("letterbox_ratio", 2.39f))
+        val cropPreset = SocialCropPreset.entries.find { it.name == savedState.getString("crop_preset") }
+            ?: SocialCropPreset.PORTRAIT_9_16
+        mediaConfig = mediaConfig.copy(
+            mode = mode,
+            letterboxRatio = savedState.getFloat("letterbox_ratio", 2.39f),
+            cropPreset = cropPreset,
+        )
         savedState.getString("selected_image_uri")?.let { selectMedia(Uri.parse(it), isVideo = false) }
         savedState.getString("selected_video_uri")?.let { selectMedia(Uri.parse(it), isVideo = true) }
     }

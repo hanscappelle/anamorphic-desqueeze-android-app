@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">AnamorphicDesqueeze</string>
     <string name="toolbar_title">Anamorphic Desqueeze</string>
-    <string name="info_about_app">This app changes the aspect ratio of images and videos. Ideal for desqueezing media taken with an anamorphic lens.</string>
+    <string name="info_about_app">Change the aspect ratio of images and videos, add black bars, or crop for social media.</string>
     <string name="info_how_to_use">
         1. Choose an image or video here, or share one from your gallery to this app.
-        \n\n2. Choose desqueeze or letterbox, select a ratio, and start the export.
+        \n\n2. Choose desqueeze, black bars, or social crop, select a ratio, and start the export.
         \n\n3. Find the result in your gallery app.</string>
     <string name="contentDescription_sample_image">sample image</string>
     <string name="title_how_to_use">How to use</string>
@@ -17,6 +17,13 @@
     <string name="mode_heading">Conversion</string>
     <string name="mode_desqueeze">Desqueeze</string>
     <string name="mode_letterbox">Black bars</string>
+    <string name="mode_social_crop">Social crop</string>
+    <string name="crop_heading">Crop format</string>
+    <string name="crop_description">Crop around the center without stretching. Content outside the selected format will be lost.</string>
+    <string name="crop_9_16">9:16 Stories and Reels</string>
+    <string name="crop_4_5">4:5 Portrait feed</string>
+    <string name="crop_1_1">1:1 Square</string>
+    <string name="action_crop">Crop for social media</string>
     <string name="letterbox_heading">Visible picture ratio</string>
     <string name="letterbox_description">Keep the original canvas and cover the top and bottom with black bars. The covered picture will be lost in the exported file.</string>
     <string name="ratio_2_39">2.39:1 Scope</string>

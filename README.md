@@ -17,7 +17,7 @@ Project: https://github.com/hanscappelle/anamorphic-desqueeze-android-app.git
 ## How to Use
 
 - Tap **Choose image or video** and select media, or share an image or video from your gallery to this app.
-- Choose desqueeze or black bars, select the desired ratio, and start the export.
+- Choose desqueeze, black bars, or social crop, select the desired ratio, and start the export.
 - Find the result in your preferred gallery app.
 
 ## Desqueeze
@@ -29,6 +29,10 @@ For images, the width of the original is multiplied by the selected ratio. Video
 ## Letterbox
 
 Alternatively, black-bars mode keeps the original canvas and picture proportions, covering the top and bottom to produce a 2.39:1, 1.85:1, 1.90:1, 1.66:1, 1.33:1, or custom visible picture ratio. Covered content is lost in the export. The target ratio must be at least as wide as the source.
+
+## Social crop
+
+Crop an image or video around its center to 9:16 for Stories and Reels, 4:5 for portrait feeds, or 1:1 for square posts. The content outside the crop is removed; the picture is not stretched. Video exports retain their audio.
 
 ## Common Widescreen & Theatrical Ratios
 
@@ -48,6 +52,7 @@ Other Notable Ratios
 - Choose an image or video using the system photo picker
 - Desqueeze to preferred aspect ratio of width*ratio x height
 - Add black bars to images or videos for a cinematic visible picture ratio
+- Crop images and videos to centered 9:16, 4:5, or 1:1 social formats
 - Fixed JPEG full original size 85% compression
 - Export desqueezed videos as MP4 with audio preserved, progress, and cancellation
 - Opens result in Gallery

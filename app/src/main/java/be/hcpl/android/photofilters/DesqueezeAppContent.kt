@@ -46,10 +46,11 @@ data class MediaConfig(
     val aspectRatio: Float = ASPECT_RATIO_DEFAULT,
     val mode: ConversionMode = ConversionMode.DESQUEEZE,
     val letterboxRatio: Float = 2.39f,
+    internal val cropPreset: SocialCropPreset = SocialCropPreset.PORTRAIT_9_16,
     val exportProgress: Int? = null,
 )
 
-enum class ConversionMode { DESQUEEZE, LETTERBOX }
+enum class ConversionMode { DESQUEEZE, LETTERBOX, SOCIAL_CROP }
 
 @Composable
 fun DesqueezeAppContent(
@@ -61,6 +62,7 @@ fun DesqueezeAppContent(
     selectRatio: (String) -> Unit = {},
     selectMode: (ConversionMode) -> Unit = {},
     selectLetterboxRatio: (String) -> Unit = {},
+    selectCropPreset: (SocialCropPreset) -> Unit = {},
 ) {
     val hasMedia = content.imageUrl != null || content.videoUrl != null
     val exporting = content.exportProgress != null
@@ -118,6 +120,7 @@ fun DesqueezeAppContent(
                     selectRatio = selectRatio,
                     selectMode = selectMode,
                     selectLetterboxRatio = selectLetterboxRatio,
+                    selectCropPreset = selectCropPreset,
                     onResize = onResize,
                     onCancelExport = onCancelExport,
                 )
@@ -160,6 +163,7 @@ private fun RatioCard(
     selectRatio: (String) -> Unit,
     selectMode: (ConversionMode) -> Unit,
     selectLetterboxRatio: (String) -> Unit,
+    selectCropPreset: (SocialCropPreset) -> Unit,
     onResize: () -> Unit,
     onCancelExport: () -> Unit,
 ) {
@@ -208,13 +212,27 @@ private fun RatioCard(
                     enabled = !exporting,
                     onSelect = { selectMode(ConversionMode.LETTERBOX) },
                 )
+                RatioOption(
+                    label = stringResource(R.string.mode_social_crop),
+                    selected = content.mode == ConversionMode.SOCIAL_CROP,
+                    enabled = !exporting,
+                    onSelect = { selectMode(ConversionMode.SOCIAL_CROP) },
+                )
             }
             Text(
-                stringResource(if (content.mode == ConversionMode.LETTERBOX) R.string.letterbox_heading else R.string.ratio_heading),
+                stringResource(when (content.mode) {
+                    ConversionMode.LETTERBOX -> R.string.letterbox_heading
+                    ConversionMode.SOCIAL_CROP -> R.string.crop_heading
+                    ConversionMode.DESQUEEZE -> R.string.ratio_heading
+                }),
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                stringResource(if (content.mode == ConversionMode.LETTERBOX) R.string.letterbox_description else R.string.ratio_description),
+                stringResource(when (content.mode) {
+                    ConversionMode.LETTERBOX -> R.string.letterbox_description
+                    ConversionMode.SOCIAL_CROP -> R.string.crop_description
+                    ConversionMode.DESQUEEZE -> R.string.ratio_description
+                }),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -248,6 +266,17 @@ private fun RatioCard(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                     )
+                }
+            } else if (content.mode == ConversionMode.SOCIAL_CROP) {
+                Column(modifier = Modifier.selectableGroup()) {
+                    SocialCropPreset.entries.forEach { preset ->
+                        RatioOption(
+                            label = stringResource(preset.labelRes),
+                            selected = content.cropPreset == preset,
+                            enabled = !exporting,
+                            onSelect = { selectCropPreset(preset) },
+                        )
+                    }
                 }
             } else {
                 Column(modifier = Modifier.selectableGroup()) {
@@ -311,6 +340,7 @@ private fun RatioCard(
                 Text(stringResource(when {
                     exporting -> R.string.action_cancel_export
                     content.mode == ConversionMode.LETTERBOX -> R.string.action_letterbox
+                    content.mode == ConversionMode.SOCIAL_CROP -> R.string.action_crop
                     else -> R.string.action_desqueeze
                 }))
             }
