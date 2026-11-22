@@ -176,10 +176,17 @@ private fun RatioCard(
             isCustom = true
         }
     }
-    val letterboxIsCustom = content.letterboxRatio != 2.39f && content.letterboxRatio != 2.35f
+    val letterboxIsCustom = LETTERBOX_RATIO_PRESETS.none { it.value == content.letterboxRatio }
     var customLetterboxSelected by rememberSaveable { mutableStateOf(letterboxIsCustom) }
     var customLetterbox by rememberSaveable {
         mutableStateOf(if (letterboxIsCustom) content.letterboxRatio.toString() else "2.0")
+    }
+
+    LaunchedEffect(content.letterboxRatio) {
+        if (letterboxIsCustom && !customLetterboxSelected) {
+            customLetterbox = content.letterboxRatio.toString()
+            customLetterboxSelected = true
+        }
     }
 
     Card(modifier = Modifier.widthIn(max = 600.dp).fillMaxWidth()) {
@@ -213,21 +220,15 @@ private fun RatioCard(
             )
             if (content.mode == ConversionMode.LETTERBOX) {
                 Column(modifier = Modifier.selectableGroup()) {
-                    RatioOption(
-                        stringResource(R.string.ratio_2_39),
-                        !customLetterboxSelected && content.letterboxRatio == 2.39f,
-                        !exporting,
-                    ) {
-                        customLetterboxSelected = false
-                        selectLetterboxRatio("2.39")
-                    }
-                    RatioOption(
-                        stringResource(R.string.ratio_2_35),
-                        !customLetterboxSelected && content.letterboxRatio == 2.35f,
-                        !exporting,
-                    ) {
-                        customLetterboxSelected = false
-                        selectLetterboxRatio("2.35")
+                    LETTERBOX_RATIO_PRESETS.forEach { preset ->
+                        RatioOption(
+                            stringResource(preset.labelRes),
+                            !customLetterboxSelected && content.letterboxRatio == preset.value,
+                            !exporting,
+                        ) {
+                            customLetterboxSelected = false
+                            selectLetterboxRatio(preset.value.toString())
+                        }
                     }
                     RatioOption(stringResource(R.string.ratio_custom), customLetterboxSelected, !exporting) {
                         customLetterboxSelected = true

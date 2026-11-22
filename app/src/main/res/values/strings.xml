@@ -19,8 +19,11 @@
     <string name="mode_letterbox">Black bars</string>
     <string name="letterbox_heading">Visible picture ratio</string>
     <string name="letterbox_description">Keep the original canvas and cover the top and bottom with black bars. The covered picture will be lost in the exported file.</string>
-    <string name="ratio_2_39">2.39:1</string>
-    <string name="ratio_2_35">2.35:1</string>
+    <string name="ratio_2_39">2.39:1 Scope</string>
+    <string name="ratio_1_85">1.85:1 Flat widescreen</string>
+    <string name="ratio_1_90">1.90:1 Digital IMAX</string>
+    <string name="ratio_1_66">1.66:1 European widescreen</string>
+    <string name="ratio_letterbox_1_33">1.33:1 Classic 4:3</string>
     <string name="custom_letterbox_ratio_label">Custom width-to-height ratio</string>
     <string name="error_letterbox_ratio">The target ratio must be at least as wide as the original and leave at least one visible pixel.</string>
     <string name="image_export_failed">Could not export image.</string>

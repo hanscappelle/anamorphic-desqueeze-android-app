@@ -28,7 +28,7 @@ For images, the width of the original is multiplied by the selected ratio. Video
 
 ## Letterbox
 
-Alternatively, black-bars mode keeps the original canvas and picture proportions, covering the top and bottom to produce a 2.39:1, 2.35:1, or custom visible picture ratio. Covered content is lost in the export. The target ratio must be at least as wide as the source.
+Alternatively, black-bars mode keeps the original canvas and picture proportions, covering the top and bottom to produce a 2.39:1, 1.85:1, 1.90:1, 1.66:1, 1.33:1, or custom visible picture ratio. Covered content is lost in the export. The target ratio must be at least as wide as the source.
 
 ## Common Widescreen & Theatrical Ratios
 
@@ -39,6 +39,7 @@ Alternatively, black-bars mode keeps the original canvas and picture proportions
 Other Notable Ratios
 
 • 1.66:1: Historically tied to European and independent cinema, offering a balance between widescreen and classic framing.
+• 1.33:1: A classic 4:3 picture ratio associated with early films and television.
 
 ## Features
 
